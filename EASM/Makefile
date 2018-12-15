@@ -39,4 +39,4 @@ remove: clean
 
 .PHONY: run
 run:
-	@bin/ephedrine
+	@bin/EASM
