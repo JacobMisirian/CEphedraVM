@@ -2,7 +2,7 @@
 #define _TOKTYPE_H_
 
 typedef enum {
-    comma, instruction, labeldec, labelreq, reg, string
+    comma, eof, error, instruction, integer, labeldec, labelreq, reg, string
 } toktype_t;
 
 #endif

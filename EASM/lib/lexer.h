@@ -18,7 +18,10 @@ typedef struct {
 
 lexerstate_t * lexer_init (FILE * f);
 void lexer_destruct (lexerstate_t * state);
-token_t * lexer_nextstr (lexerstate_t * state);
-token_t * lexer_nextident (lexerstate_t * state);
+int lexer_rewind (lexerstate_t * state, int count);
+int lexer_forward (lexerstate_t * state, int count);
+int lexer_gpos (lexerstate_t * state);
+int lexer_spos (lexerstate_t * state, int pos);
+void lexer_nexttok (lexerstate_t * state, token_t * token);
 
 #endif

@@ -1,8 +1,12 @@
 #include <lib/lexer.h>
 
-static void lexer_wspace (lexerstate_t * state);
-static int lexer_peekc (lexerstate_t * state);
-static int lexer_readc (lexerstate_t * state);
+static void lexer_nextstr (lexerstate_t *, token_t *);
+static void lexer_nextident (lexerstate_t *, token_t *);
+static void lexer_nextlabeldec (lexerstate_t *, token_t *);
+static void lexer_nextinteger (lexerstate_t *, token_t *);
+static void lexer_wspace (lexerstate_t *);
+static int lexer_peekc (lexerstate_t *);
+static int lexer_readc (lexerstate_t *);
 
 lexerstate_t * lexer_init (FILE * f) {
     lexerstate_t * state = (lexerstate_t *)malloc (sizeof (lexerstate_t));
@@ -31,7 +35,66 @@ void lexer_destruct (lexerstate_t * state) {
     free (state);
 }
 
-token_t * lexer_nextstr (lexerstate_t * state) {
+int lexer_rewind (lexerstate_t * state, int count) {
+    if ((state->pos - count) >= 0 && (state->pos - count) < state->len) {
+        state->pos -= count;
+        return 1;
+    }
+    return -1;
+}
+
+int lexer_forward (lexerstate_t * state, int count) {
+    if ((state->pos + count) >= 0 && (state->pos + count) < state->len) {
+        state->pos += count;
+        return 1;
+    }
+    return -1;
+}
+
+int lexer_gpos (lexerstate_t * state) {
+    return state->pos;
+}
+
+int lexer_spos (lexerstate_t * state, int pos) {
+    if (pos >= 0 && pos < state->len) {
+        state->pos = pos;
+        return 1;
+    }
+    return -1;
+}
+
+void lexer_nexttok (lexerstate_t * state, token_t * token) {
+    lexer_wspace (state); // burn whitespace.
+
+    if (lexer_peekc (state) == -1) {
+        token->type = eof;
+        return;
+    }
+
+    char c = (char)lexer_peekc (state);
+
+    if (c == ',') {
+        token->type = comma;
+        lexer_readc (state);
+    }
+    else if (c == '"') {
+        lexer_nextstr (state, token);
+    }
+    else if (isalpha (c)) {
+        lexer_nextident (state, token);
+    }
+    else if (c == '.') {
+        lexer_nextlabeldec (state, token);
+    }
+    else if (isdigit (c)) {
+        lexer_nextinteger (state, token);
+    }
+    else {
+        token->type = error;
+    }
+}
+
+static void lexer_nextstr (lexerstate_t * state, token_t * token) {
     lexer_readc (state); // "
     int size = 1; // size of null-terminated string.
     // count until " is passed.
@@ -50,14 +113,11 @@ token_t * lexer_nextstr (lexerstate_t * state) {
     str [i] = 0;
     lexer_readc (state); // "
 
-    token_t * ret = (token_t *)malloc (sizeof (token_t));
-    ret->val = str;
-    ret->type = string;
-
-    return ret;
+    token->val = str;
+    token->type = string;
 }
 
-token_t * lexer_nextident (lexerstate_t * state) {
+static void lexer_nextident (lexerstate_t * state, token_t * token) {
     lexer_wspace (state);
     int len = 0; // length of identifier.
 
@@ -76,22 +136,49 @@ token_t * lexer_nextident (lexerstate_t * state) {
     }
     str [i] = 0;
     
-    token_t * ret = (token_t *)malloc (sizeof (token_t));
-    ret->val = str;
+    token->val = str;
 
     // check token type of identifier.
     if (getregister (str) != -1)
-        ret->type = reg;
+        token->type = reg;
     else if (getinst (str) != -1)
-        ret->type = instruction;
+        token->type = instruction;
     else
-        ret->type = labelreq;
+        token->type = labelreq;
+}
 
-    return ret;
+static void lexer_nextlabeldec (lexerstate_t * state, token_t * token) {
+    lexer_readc (state); // .
+    
+    lexer_nextident (state, token); // label name will read as toktype::labelreq.
+
+    token->type = labeldec; // change identifier token from labelreq to labeldec.
+}
+
+static void lexer_nextinteger (lexerstate_t * state, token_t * token) {
+    int len = 0; // length of integer.
+    
+    // count while digit.
+    while (isdigit ((char)lexer_readc (state))) {
+        len++;
+    }
+
+    state->pos -= (len + 1); // isdigit returned false, meaning lexer_readc burned another char.
+    
+    // read integer string into heap.
+    char * str = (char *)malloc (len + 1);
+    int i;
+    for (i = 0; i < len; i++) {
+        str [i] = (char)lexer_readc (state);
+    }
+    str [i] = 0;
+
+    token->val = str;
+    token->type = integer;
 }
 
 static void lexer_wspace (lexerstate_t * state) {
-    while (lexer_peekc (state) != -1) {
+    while (lexer_peekc (state) != -1) { 
         if (isspace ((char)lexer_peekc (state)) == 0) break;
         state->pos++;
     }
