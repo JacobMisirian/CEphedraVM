@@ -105,7 +105,7 @@ static void lexer_nextstr (lexerstate_t * state, token_t * token) {
         size++;
     }
 
-    state->pos -= size; // rewind to first "
+    lexer_rewind (state, size); // rewind to first "
 
     // read string onto heap and null-terminate.
     char * str = (char *)malloc (size);
@@ -129,7 +129,7 @@ static void lexer_nextident (lexerstate_t * state, token_t * token) {
         len++;
     }
 
-    state->pos -= (len + 1); // rewind to start of identifier.
+    lexer_rewind (state, len + 1); // rewind to start of identifier.
 
     // read identifier into heap and null-terminate.
     char * str = (char *)malloc (len + 2); // 1 extra byte so emit can append 'i'.
@@ -152,9 +152,8 @@ static void lexer_nextident (lexerstate_t * state, token_t * token) {
 
 static void lexer_nextlabeldec (lexerstate_t * state, token_t * token) {
     lexer_readc (state); // .
-    
-    lexer_nextident (state, token); // label name will read as toktype::labelreq.
 
+    lexer_nextident (state, token); // label name will read as toktype::labelreq.
     token->type = labeldec; // change identifier token from labelreq to labeldec.
 }
 
@@ -166,7 +165,7 @@ static void lexer_nextinteger (lexerstate_t * state, token_t * token) {
         len++;
     }
 
-    state->pos -= (len + 1); // isdigit returned false, meaning lexer_readc burned another char.
+    lexer_rewind (state, len + 1); // isdigit returned false, meaning lexer_readc burned another char.
     
     // read integer string into heap.
     char * str = (char *)malloc (len + 1);

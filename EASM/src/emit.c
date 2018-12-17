@@ -21,10 +21,11 @@ int assemble (lexerstate_t * lexer, uint8_t * bin) {
     state->tok = (token_t *)malloc (sizeof (token_t));
     state->len = binarylen (state);
 
-    bin = (uint8_t *)malloc (state->len);
+    bin = (uint8_t *)malloc (state->len); // output data.
 
-    lexer_nexttok (lexer, state->tok);
-    while (state->tok->type != eof) {
+    do {
+        lexer_nexttok (lexer, state->tok); // get next token.
+        // if token is a string, encode the literal in the data.
         if (state->tok->type == string) {
             int len = strlen (state->tok->val);
             for (int i = 0; i < len; i++) {
@@ -32,6 +33,7 @@ int assemble (lexerstate_t * lexer, uint8_t * bin) {
             }
             bin [state->pos++] = 0;
         }
+        // if token is an instruction, encode it.
         else if (state->tok->type == instruction) {
             uint32_t i = expectinst (state);
             bin [state->pos++] = (i >> 24) & 0xFF;
@@ -39,8 +41,7 @@ int assemble (lexerstate_t * lexer, uint8_t * bin) {
             bin [state->pos++] = (i >>  8) & 0xFF;
             bin [state->pos++] = i & 0xFF;
         }
-        lexer_nexttok (lexer, state->tok);
-    }
+    } while (state->tok->type != eof); // do until eof.
 
     int binsize = state->pos;
 
@@ -63,6 +64,7 @@ static uint32_t expectinst (struct emitstate * state) {
         strcmp (id, "sub") == 0) {
         op1 = expectreg (state);
         expectcomma (state);
+        // we need to check 1 token ahead.
 	int lexertmp = lexer_gpos (state->lexer);
         lexer_nexttok (state->lexer, state->tok);
         lexer_spos (state->lexer, lexertmp);
