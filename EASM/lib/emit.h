@@ -11,6 +11,6 @@
 #include <lib/token.h>
 #include <lib/toktype.h>
 
-uint8_t * assemble (lexerstate_t * lexer);
+int assemble (lexerstate_t * lexer, uint8_t * bin);
 
 #endif

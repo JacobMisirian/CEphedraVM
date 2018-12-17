@@ -39,4 +39,4 @@ remove: clean
 
 .PHONY: run
 run:
-	@bin/EASM bin/test.easm
+	@bin/EASM bin/test.easm bin/a.out

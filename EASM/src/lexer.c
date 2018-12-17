@@ -68,6 +68,7 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
 
     if (lexer_peekc (state) == -1) {
         token->type = eof;
+        token->val = 0;
         return;
     }
 
@@ -75,6 +76,7 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
 
     if (c == ',') {
         token->type = comma;
+        token->val = 0;
         lexer_readc (state);
     }
     else if (c == '"') {
@@ -91,6 +93,7 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
     }
     else {
         token->type = error;
+        token->val = 0;
     }
 }
 
@@ -129,7 +132,7 @@ static void lexer_nextident (lexerstate_t * state, token_t * token) {
     state->pos -= (len + 1); // rewind to start of identifier.
 
     // read identifier into heap and null-terminate.
-    char * str = (char *)malloc (len + 1);
+    char * str = (char *)malloc (len + 2); // 1 extra byte so emit can append 'i'.
     int i;
     for (i = 0; i < len; i++) {
         str [i] = (char)lexer_readc (state);

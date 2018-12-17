@@ -1,7 +1,12 @@
-add r1, 69
 jmp main
 .end
 hcf
 .main
-push "abcde", flags
+add r5, r1
+add r5, 69
+push dat
+mov r2, r5
 jmp end
+
+.dat
+"Hello, World!"
