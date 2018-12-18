@@ -1,12 +1,8 @@
-jmp main
-.end
-hcf
-.main
-add r5, r1
-add r5, 69
-push dat
-mov r2, r5
-jmp end
-
-.dat
-"Hello, World!"
+; I am a comment
+li r1, 98 ; so am i
+li r5, 10
+add r1, r5
+add r1, 2
+mov r2, r1
+hcf ; this is a comment
+; this is also a comment.

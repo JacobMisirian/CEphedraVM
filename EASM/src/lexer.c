@@ -1,12 +1,13 @@
 #include <lib/lexer.h>
 
-static void lexer_nextstr (lexerstate_t *, token_t *);
-static void lexer_nextident (lexerstate_t *, token_t *);
+static void lexer_nextstr      (lexerstate_t *, token_t *);
+static void lexer_nextident    (lexerstate_t *, token_t *);
 static void lexer_nextlabeldec (lexerstate_t *, token_t *);
-static void lexer_nextinteger (lexerstate_t *, token_t *);
-static void lexer_wspace (lexerstate_t *);
-static int lexer_peekc (lexerstate_t *);
-static int lexer_readc (lexerstate_t *);
+static void lexer_nextinteger  (lexerstate_t *, token_t *);
+static void lexer_wspace  (lexerstate_t *);
+static void lexer_comment (lexerstate_t *);
+static int lexer_peekc    (lexerstate_t *);
+static int lexer_readc    (lexerstate_t *);
 
 lexerstate_t * lexer_init (FILE * f) {
     lexerstate_t * state = (lexerstate_t *)malloc (sizeof (lexerstate_t));
@@ -90,6 +91,10 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
     }
     else if (isdigit (c)) {
         lexer_nextinteger (state, token);
+    }
+    else if (c == ';') {
+        lexer_comment (state);
+        lexer_nexttok (state, token);
     }
     else {
         token->type = error;
@@ -183,6 +188,13 @@ static void lexer_wspace (lexerstate_t * state) {
     while (lexer_peekc (state) != -1) { 
         if (isspace ((char)lexer_peekc (state)) == 0) break;
         state->pos++;
+    }
+}
+
+static void lexer_comment (lexerstate_t * state) {
+    lexer_readc (state); // ;
+    while (lexer_peekc (state) != -1) {
+        if ((char)lexer_readc (state) == '\n') break;
     }
 }
 

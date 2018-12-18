@@ -1,57 +1,57 @@
 #include <lib/emit.h>
 
-struct emitstate {
-    uint16_t pos;
-    uint16_t len;
-    lexerstate_t * lexer;
-    token_t * tok;
-};
+static uint32_t expectinst (emitstate_t * state);
+static int expectcomma (emitstate_t * state);
+static int expectreg   (emitstate_t * state);
+static int expectimm   (emitstate_t * state);
+static int seeklabel (emitstate_t * state, const char * lbl);
+static int binarylen (emitstate_t * state);
 
-static uint32_t expectinst (struct emitstate * state);
-static int expectcomma (struct emitstate * state);
-static int expectreg   (struct emitstate * state);
-static int expectimm   (struct emitstate * state);
-static int seeklabel (struct emitstate * state, const char * lbl);
-static int binarylen (struct emitstate * state);
-
-int assemble (lexerstate_t * lexer, uint8_t * bin) {
-    struct emitstate * state = (struct emitstate *)malloc (sizeof (struct emitstate));
+emitstate_t * emit_init (lexerstate_t * lexer) {
+    emitstate_t * state = (emitstate_t *)malloc (sizeof (emitstate_t)); 
+    state->tok = (token_t *)malloc (sizeof (token_t));
     state->lexer = lexer;
     state->pos = 0;
-    state->tok = (token_t *)malloc (sizeof (token_t));
     state->len = binarylen (state);
+    state->bin = (uint8_t *)malloc (state->len);
 
-    bin = (uint8_t *)malloc (state->len); // output data.
+    return state;
+}
 
+void emit_destruct (emitstate_t * state) {
+    free (state->tok);
+    free (state->bin);
+    free (state); // Israel!
+}
+
+int emit_len (emitstate_t * state) {
+    return state->len;
+}
+
+uint8_t * emit_assemble (emitstate_t * state) {
     do {
-        lexer_nexttok (lexer, state->tok); // get next token.
+        lexer_nexttok (state->lexer, state->tok); // get next token.
         // if token is a string, encode the literal in the data.
         if (state->tok->type == string) {
             int len = strlen (state->tok->val);
             for (int i = 0; i < len; i++) {
-                bin [state->pos++] = state->tok->val [i];
+                state->bin [state->pos++] = state->tok->val [i];
             }
-            bin [state->pos++] = 0;
+            state->bin [state->pos++] = 0;
         }
         // if token is an instruction, encode it.
         else if (state->tok->type == instruction) {
             uint32_t i = expectinst (state);
-            bin [state->pos++] = (i >> 24) & 0xFF;
-            bin [state->pos++] = (i >> 16) & 0xFF;
-            bin [state->pos++] = (i >>  8) & 0xFF;
-            bin [state->pos++] = i & 0xFF;
+            unsigned char buffer [4];
+            memcpy (buffer, (unsigned char *)&(i), 4);
+            for (int i = 0; i < 4; i++)
+                state->bin [state->pos++] = buffer[i];
         }
     } while (state->tok->type != eof); // do until eof.
-
-    int binsize = state->pos;
-
-    free (state->tok);
-    free (state);
-
-    return binsize;
+    return state->bin;
 }
 
-static uint32_t expectinst (struct emitstate * state) {
+static uint32_t expectinst (emitstate_t * state) {
     uint8_t code = 0, op1 = 0, op2 = 0;
     uint16_t imm = 0;
 
@@ -112,7 +112,7 @@ static uint32_t expectinst (struct emitstate * state) {
     return buildinst (code, op1, op2, imm);
 }
 
-static int expectcomma (struct emitstate * state) {
+static int expectcomma (emitstate_t * state) {
     lexer_nexttok (state->lexer, state->tok);
     if (state->tok->type != comma) {
         printf ("Expected comma, got %d with val: \"%s\"\n", state->tok->type, state->tok->val);
@@ -121,7 +121,7 @@ static int expectcomma (struct emitstate * state) {
     return 1;
 }
 
-static int expectreg (struct emitstate * state) {
+static int expectreg (emitstate_t * state) {
     lexer_nexttok (state->lexer, state->tok);
     if (state->tok->type != reg) {
         printf ("Expected register, got %d with val: \"%s\"\n", state->tok->type, state->tok->val);
@@ -131,7 +131,7 @@ static int expectreg (struct emitstate * state) {
     return getregister (state->tok->val);    
 }
 
-static int expectimm (struct emitstate * state) {
+static int expectimm (emitstate_t * state) {
     lexer_nexttok (state->lexer, state->tok);
     if (state->tok->type == integer) {
         return atoi (state->tok->val);
@@ -144,7 +144,7 @@ static int expectimm (struct emitstate * state) {
     return -1;
 }
 
-static int seeklabel (struct emitstate * state, const char * lbl) {
+static int seeklabel (emitstate_t * state, const char * lbl) {
     uint16_t realpos = lexer_gpos (state->lexer); // save current lexer position.
     lexer_spos (state->lexer, 0); // rewind lexer to beginning.
 
@@ -171,11 +171,11 @@ static int seeklabel (struct emitstate * state, const char * lbl) {
     return -1;
 }
 
-static int binarylen (struct emitstate * state) {
+static int binarylen (emitstate_t * state) {
     int len = 0;
+    lexer_spos (state->lexer, 0);
     do {
         lexer_nexttok (state->lexer, state->tok);
-
         if (state->tok->type == instruction) {
             len += INST_SIZE;
         }

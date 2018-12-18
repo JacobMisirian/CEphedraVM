@@ -11,6 +11,17 @@
 #include <lib/token.h>
 #include <lib/toktype.h>
 
-int assemble (lexerstate_t * lexer, uint8_t * bin);
+typedef struct {
+    uint8_t * bin;
+    uint16_t pos;
+    uint16_t len;
+    lexerstate_t * lexer;
+    token_t * tok;
+} emitstate_t;
+
+emitstate_t * emit_init (lexerstate_t * lexer);
+void emit_destruct (emitstate_t * state);
+int emit_len (emitstate_t * state);
+uint8_t * emit_assemble (emitstate_t * state);
 
 #endif
