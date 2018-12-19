@@ -58,10 +58,10 @@ static uint32_t expectinst (emitstate_t * state) {
     char * id = state->tok->val;
     code = getinst (id);
     // <op> <r1>, [<r2>/<int>/<lbl>]
-    if (strcmp (id, "add") == 0 || strcmp (id, "lb")  == 0 || 
-        strcmp (id, "lw")  == 0 || strcmp (id, "mod") == 0 ||
-        strcmp (id, "sb")  == 0 || strcmp (id, "sw")  == 0 ||
-        strcmp (id, "sub") == 0) {
+    if (strcmp (id, "add") == 0 || 
+        strcmp (id, "lb")  == 0 || strcmp (id, "lw") == 0 ||
+        strcmp (id, "mod")  == 0 || strcmp (id, "sb")  == 0 ||
+        strcmp (id, "sw") == 0 || strcmp (id, "sub") == 0) {
         op1 = expectreg (state);
         expectcomma (state);
         // we need to check 1 token ahead.
@@ -72,12 +72,12 @@ static uint32_t expectinst (emitstate_t * state) {
             op2 = expectreg (state);
         }
         else {
-            code |= (1 << 7);
+            op2 |= (1 << 5);
             imm = expectimm (state);
         }
     }
     // <op> [<int>/<lbl>]
-    else if (strcmp (id, "jmp") == 0) {
+    else if (strcmp (id, "jmp") == 0 || strcmp (id, "call") == 0) {
         code |= (1 << 7);
         imm = expectimm (state);
     }
@@ -107,7 +107,7 @@ static uint32_t expectinst (emitstate_t * state) {
             op1 = expectreg (state);
         }
         else {
-            code |= (1 << 6);
+            op1 |= (1 << 5);
             imm = expectimm (state);
         }
     }

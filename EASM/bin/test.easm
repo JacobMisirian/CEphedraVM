@@ -1,9 +1,10 @@
-jmp main
-.end
+li r0, 2024
+li r1, 1024
+push r0
+add r0, r1
+push r1
+push 1
+pop r2
+pop r3
+pop r4
 hcf
-.main
-li r1, 98
-add r1, 1
-li r2, 4
-sub r1, r2
-jmp end
