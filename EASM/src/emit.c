@@ -72,16 +72,18 @@ static uint32_t expectinst (emitstate_t * state) {
             op2 = expectreg (state);
         }
         else {
-            code = getinst (strcat (id, "i"));
+            code |= (1 << 7);
             imm = expectimm (state);
         }
     }
     // <op> [<int>/<lbl>]
     else if (strcmp (id, "jmp") == 0) {
+        code |= (1 << 7);
         imm = expectimm (state);
     }
     // <op> <r1>, [<int>, <lbl>]
     else if (strcmp (id, "li") == 0) {
+        code |= (1 << 7);
         op1 = expectreg (state);
         expectcomma (state);
         imm = expectimm (state);
@@ -105,7 +107,7 @@ static uint32_t expectinst (emitstate_t * state) {
             op1 = expectreg (state);
         }
         else {
-            code = getinst (strcat (id, "i"));
+            code |= (1 << 6);
             imm = expectimm (state);
         }
     }

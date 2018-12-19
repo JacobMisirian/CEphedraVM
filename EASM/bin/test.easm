@@ -1,8 +1,9 @@
-; I am a comment
-li r1, 98 ; so am i
-li r5, 10
-add r1, r5
-add r1, 2
-mov r2, r1
-hcf ; this is a comment
-; this is also a comment.
+jmp main
+.end
+hcf
+.main
+li r1, 98
+add r1, 1
+li r2, 4
+sub r1, r2
+jmp end

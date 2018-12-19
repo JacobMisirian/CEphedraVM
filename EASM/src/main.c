@@ -34,4 +34,6 @@ int main (int argc, char * argv[]) {
     lexer_destruct (lexer);
     emit_destruct (emit);
     free (tok);
+
+    return 0;
 }
