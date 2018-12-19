@@ -47,10 +47,11 @@ void cpu_power (cpustate_t * state) {
                 break;
             case INST_CALL:
                 state->registers [R_STACK] -= 2;
+                state->registers [R_IP] += INST_SIZE;
                 memcpy ((unsigned char *)buffer, (unsigned char *)&(state->registers [R_IP]), 2);
                 state->ram [state->registers [R_STACK]] = buffer [0];
                 state->ram [state->registers [R_STACK] + 1] = buffer [1];
-                state->registers [R_IP] = second;
+                state->registers [R_IP] = imm;
                 continue;
             case INST_HCF:
                 for (int i = 0; i < 0x10; i++) {
