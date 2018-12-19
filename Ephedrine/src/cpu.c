@@ -62,15 +62,13 @@ void cpu_power (cpustate_t * state) {
                 state->registers[R_IP] = imm;
                 continue;
             case INST_LB:
-                state->ram [state->registers [op1]] = second;
+                state->registers [op1] = state->ram [second];
                 break;;
             case INST_LI:
                 state->registers [op1] = imm;
                 break;
             case INST_LW:
-                memcpy ((unsigned char *)buffer, (unsigned char *)&(second), 2);
-                state->ram [state->registers [op1]]     = buffer [0];
-                state->ram [state->registers [op1] + 1] = buffer [1];
+                state->registers [op1] = (uint16_t)state->ram [second] ^ (((uint16_t)state->ram [second + 1]) << 8);
                 break;
             case INST_MOD:
                 state->registers [op1] %= second;
@@ -79,8 +77,8 @@ void cpu_power (cpustate_t * state) {
                 state->registers [op1] = state->registers [op2];
                 break;
             case INST_POP:
-                state->registers [op1] = (uint16_t)state->ram [state->registers[R_STACK]++] ^ 
-                                                    (((uint16_t)state->ram [state->registers[R_STACK]++]) << 8);
+                state->registers [op1] = (uint16_t)state->ram [state->registers [R_STACK]++] ^ 
+                                                    (((uint16_t)state->ram [state->registers [R_STACK]++]) << 8);
                 break;
             case INST_PUSH:
                 state->registers[R_STACK] -= 2;
@@ -89,7 +87,7 @@ void cpu_power (cpustate_t * state) {
                 state->ram [state->registers[R_STACK] + 1] = buffer [1];
                 break;
             case INST_RET:
-                state->registers[R_IP] = (uint16_t)state->ram [state->registers[R_STACK]++] ^ (((uint16_t)state->ram [state->registers[R_STACK]++]) >> 8);
+                state->registers[R_IP] = (uint16_t)state->ram [state->registers [R_STACK]++] ^ (((uint16_t)state->ram [state->registers [R_STACK]++]) << 8);
                 continue;
             case INST_SB:
                 state->ram [state->registers [op1]] = second;

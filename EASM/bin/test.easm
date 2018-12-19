@@ -1,10 +1,4 @@
-li r0, 2024
-li r1, 1024
-push r0
-add r0, r1
-push r1
-push 1
-pop r2
-pop r3
-pop r4
+li sp, 3000
+push 1337
+lw r1, sp
 hcf

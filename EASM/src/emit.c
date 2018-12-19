@@ -78,7 +78,6 @@ static uint32_t expectinst (emitstate_t * state) {
     }
     // <op> [<int>/<lbl>]
     else if (strcmp (id, "jmp") == 0 || strcmp (id, "call") == 0) {
-        code |= (1 << 7);
         imm = expectimm (state);
     }
     // <op> <r1>, [<int>, <lbl>]
