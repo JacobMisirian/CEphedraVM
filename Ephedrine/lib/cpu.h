@@ -9,9 +9,8 @@
 
 #define INST_SIZE 0x4
 
-#define FLAGS_REG state->registers [0xC]
-#define IP_REG    state->registers [0xE]
-#define STACK_REG state->registers [0xF]
+#define R_IP 0xE
+#define R_STACK 0XF
 
 typedef struct {
     uint8_t * ram;

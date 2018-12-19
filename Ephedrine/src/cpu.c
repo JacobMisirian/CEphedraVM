@@ -20,9 +20,9 @@ void cpu_power (cpustate_t * state) {
     uint8_t code, op1, op2;
     uint8_t buffer [2];
 
-    IP_REG = 0;
+    state->registers[R_IP] = 0;
     while (1) {
-        inst = *(uint32_t*)(state->ram + IP_REG);
+        inst = *(uint32_t*)(state->ram + state->registers[R_IP]);
         parseinst (inst, &code, &op1, &op2, &imm);
         printf ("Int: %u, Opcode %u, Op1: %u, Op2: %u, Imm: %u\n", inst, code, op1, op2, imm);
 
@@ -54,7 +54,7 @@ void cpu_power (cpustate_t * state) {
                 }
                 return;
             case INST_JMP:
-                IP_REG = imm;
+                state->registers[R_IP] = imm;
                 continue;
             case INST_LB:
                 state->ram [state->registers [op1]] = second;
@@ -75,17 +75,17 @@ void cpu_power (cpustate_t * state) {
                 state->registers [op1] = state->registers [op2];
                 break;
             case INST_POP:
-                state->registers [op1] = ((uint16_t)state->ram [STACK_REG++] << 8) ^ 
-                                                    (uint16_t)state->ram [STACK_REG++];
+                state->registers [op1] = ((uint16_t)state->ram [state->registers[R_STACK]++] << 8) ^ 
+                                                    (uint16_t)state->ram [state->registers[R_STACK]++];
                 break;
             case INST_PUSH:
-                STACK_REG -= 2;
+                state->registers[R_STACK] -= 2;
                 memcpy ((unsigned char *)buffer, (unsigned char *)&(first), 2);
-                state->ram [STACK_REG]     = buffer [0];
-                state->ram [STACK_REG + 1] = buffer [1];
+                state->ram [state->registers[R_STACK]]     = buffer [0];
+                state->ram [state->registers[R_STACK] + 1] = buffer [1];
                 break;
             case INST_RET:
-                IP_REG = ((uint16_t)state->ram [STACK_REG++] << 8) ^ (uint16_t)state->ram [STACK_REG++];
+                state->registers[R_IP] = ((uint16_t)state->ram [state->registers[R_STACK]++] << 8) ^ (uint16_t)state->ram [state->registers[R_STACK]++];
                 continue;
             case INST_SB:
                 state->ram [state->registers [op1]] = second;
@@ -100,7 +100,7 @@ void cpu_power (cpustate_t * state) {
                 break;
         }
 
-        IP_REG += INST_SIZE;
+        state->registers[R_IP] += INST_SIZE;
     }
 }
 
