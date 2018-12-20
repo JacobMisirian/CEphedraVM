@@ -1,11 +1,13 @@
 #ifndef _CPU_H_
 #define _CPU_H_
 
+#include <lib/device.h>
 #include <lib/instructions.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <lib/textscreen.h>
 
 #define INST_SIZE 0x4
 
@@ -15,6 +17,7 @@
 typedef struct {
     uint8_t * ram;
     int16_t registers [0x10];
+    device_t * screen;
 } cpustate_t;
 
 cpustate_t * cpu_init (char os[], size_t ossize, size_t rsize);

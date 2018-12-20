@@ -4,8 +4,11 @@ static void parseinst (uint32_t inst, uint8_t * code, uint8_t * op1, uint8_t * o
 
 cpustate_t * cpu_init (char os[], size_t ossize, size_t rsize) {
     cpustate_t * state = (cpustate_t *)malloc (sizeof (cpustate_t));
+
     state->ram = (uint8_t *)malloc (rsize);
     memcpy (state->ram, os, ossize);
+    state->screen = textscreen_init ();
+
     return state;
 }
 
@@ -14,6 +17,8 @@ void cpu_free (cpustate_t * state) {
 }
 
 void cpu_power (cpustate_t * state) {
+    state->screen->power (state);
+
     uint32_t inst;
     uint16_t imm;
     uint8_t code, op1, op2;
@@ -103,7 +108,8 @@ void cpu_power (cpustate_t * state) {
         }
 
         state->registers[R_IP] += INST_SIZE;
-    }
+        state->screen->tick (state);
+   }
 }
 
 static void parseinst (uint32_t inst, uint8_t * code, uint8_t * op1, uint8_t * op2, uint16_t * imm) {
