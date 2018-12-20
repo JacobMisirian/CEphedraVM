@@ -35,8 +35,8 @@ void cpu_power (cpustate_t * state) {
             first = imm;
             second = state->registers [op2];
         }
-        else if ((op2 >> 5) & 1) {
-            op2 ^= (1 << 5);
+        else if ((op2 >> 4) & 1) {
+            op2 ^= (1 << 4);
             first = state->registers [op1];
             second = imm;
         } else {
@@ -110,8 +110,8 @@ void cpu_power (cpustate_t * state) {
 }
 
 static void parseinst (uint32_t inst, uint8_t * code, uint8_t * op1, uint8_t * op2, uint16_t * imm) {
-    (*code) = (uint8_t)(inst >> 28);
+    (*code) = (uint8_t)(inst >> 27);
     (*op1) = (uint8_t)((inst >> 16) & 63);
-    (*op2) = (uint8_t)((inst >> 22) & 63);
+    (*op2) = (uint8_t)((inst >> 22) & 31);
     (*imm) = (uint16_t)(inst & 0xFFFF);
 }
