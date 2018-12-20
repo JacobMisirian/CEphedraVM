@@ -69,17 +69,14 @@ void cpu_power (cpustate_t * state) {
             case INST_LB:
                 state->registers [op1] = state->ram [second];
                 break;;
-            case INST_LI:
-                state->registers [op1] = imm;
+            case INST_LD:
+                state->registers [op1] = second;
                 break;
             case INST_LW:
                 state->registers [op1] = (uint16_t)state->ram [second] ^ (((uint16_t)state->ram [second + 1]) << 8);
                 break;
             case INST_MOD:
                 state->registers [op1] %= second;
-                break;
-            case INST_MOV:
-                state->registers [op1] = state->registers [op2];
                 break;
             case INST_POP:
                 state->registers [op1] = (uint16_t)state->ram [state->registers [R_STACK]++] ^ 

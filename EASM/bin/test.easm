@@ -1,4 +1,7 @@
-li sp, 3000
-push 1337
-lw r1, sp
+ld r0, 4000
+ld r1, 97
+sb r0, r1
+add r0, 2
+sb r0, r1
+ld r5, r0
 hcf

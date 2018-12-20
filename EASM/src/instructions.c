@@ -1,6 +1,6 @@
 #include <lib/instructions.h>
 
-static char * inst_names[] = { "add", "call", "hcf", "jmp", "lb", "li", "lw", "mod", "mov", "pop", "push", "ret", "sb", "sw", "sub" };
+static char * inst_names[] = { "add", "call", "hcf", "jmp", "lb", "ld", "lw", "mod", "pop", "push", "ret", "sb", "sw", "sub" };
 
 int getinst (char * s) {
     for (int i = 0; i < 15; i++) {

@@ -58,8 +58,8 @@ static uint32_t expectinst (emitstate_t * state) {
     char * id = state->tok->val;
     code = getinst (id);
     // <op> <r1>, [<r2>/<int>/<lbl>]
-    if (strcmp (id, "add") == 0 || 
-        strcmp (id, "lb")  == 0 || strcmp (id, "lw") == 0 ||
+    if (strcmp (id, "add") == 0 || strcmp (id, "lb") == 0 ||
+        strcmp (id, "ld")  == 0 || strcmp (id, "lw") == 0 ||
         strcmp (id, "mod")  == 0 || strcmp (id, "sb")  == 0 ||
         strcmp (id, "sw") == 0 || strcmp (id, "sub") == 0) {
         op1 = expectreg (state);
@@ -79,19 +79,6 @@ static uint32_t expectinst (emitstate_t * state) {
     // <op> [<int>/<lbl>]
     else if (strcmp (id, "jmp") == 0 || strcmp (id, "call") == 0) {
         imm = expectimm (state);
-    }
-    // <op> <r1>, [<int>, <lbl>]
-    else if (strcmp (id, "li") == 0) {
-        code |= (1 << 7);
-        op1 = expectreg (state);
-        expectcomma (state);
-        imm = expectimm (state);
-    }
-    // <op> <r1>, <r2>
-    else if (strcmp (id, "mov") == 0) {
-        op1 = expectreg (state);
-        expectcomma (state);
-        op2 = expectreg (state);
     }
     // <op> <r1>
     else if (strcmp (id, "pop") == 0) {
