@@ -17,7 +17,7 @@ printf ("Serializing %u\t%u\t%u\t%u\t\n", code, op1, op2, imm);
     uint32_t i = imm;
     i ^= ((uint32_t)op1 << 16);
     i ^= ((uint32_t)op2 << 22);
-    i ^= ((uint32_t)code << 28);
+    i ^= ((uint32_t)code << 27);
 
 printf ("Out: %u\n", i);
 

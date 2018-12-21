@@ -72,7 +72,7 @@ static uint32_t expectinst (emitstate_t * state) {
             op2 = expectreg (state);
         }
         else {
-            op2 |= (1 << 5);
+            op2 |= (1 << 4);
             imm = expectimm (state);
         }
     }
