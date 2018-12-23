@@ -1,4 +1,5 @@
 #include <lib/lexer.h>
+#include <lib/llist.h>
 #include <lib/token.h>
 #include <lib/toktype.h>
 
@@ -17,4 +18,21 @@ int main (int argc, char * argv[]) {
 
     fclose (in);
     lexer_free (lexer);
+
+    int * a, * b, * c;
+    a = (int *)malloc (sizeof (int));
+    b = (int *)malloc (sizeof (int));
+    c = (int *)malloc (sizeof (int));
+    *a = 69;
+    *b = 420;
+    *c = 1337;
+
+    node_t * root = llist_init (&a);
+    printf ("llist size = %d\n", llist_size (root));
+    printf ("I am about to call llist_add\n");
+    llist_add (&c);
+    printf ("llist size = %d\n", llist_size (root));
+    llist_add (&b);
+    for (int i = 0; i < 3; i++) 
+        printf ("llist [%d] = %d\n", i, *(int *)llist_get (root, i));
 }
