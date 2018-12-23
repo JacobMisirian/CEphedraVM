@@ -2,6 +2,7 @@
 #define _LLIST_H_
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct node {
@@ -9,9 +10,9 @@ typedef struct node {
     struct node * next;
 } node_t;
 
-node_t * llist_init (void * ptr);
 void llist_free (node_t * root);
-void * llist_get (node_t * root, int i);
 size_t llist_size (node_t * root);
+node_t * llist_add (node_t * root, void * ptr);
+void * llist_get (node_t * root, int i);
 
 #endif
