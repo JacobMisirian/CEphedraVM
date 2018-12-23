@@ -1,10 +1,10 @@
-#include <lib/emit.h>
+#include <inc/emit.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lib/lexer.h>
-#include <lib/token.h>
-#include <lib/toktype.h>
+#include <inc/lexer.h>
+#include <inc/token.h>
+#include <inc/toktype.h>
 
 int main (int argc, char * argv[]) {
     // tokenize source code.

@@ -1,4 +1,4 @@
-#include <lib/instructions.h>
+#include <inc/instructions.h>
 
 static char * inst_names[] = { "add", "call", "hcf", "jmp", "lb", "ld", "lw", "mod", "pop", "push", "ret", "sb", "sw", "sub" };
 

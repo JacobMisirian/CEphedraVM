@@ -1,7 +1,7 @@
-#include <lib/lexer.h>
-#include <lib/llist.h>
-#include <lib/token.h>
-#include <lib/toktype.h>
+#include <inc/lexer.h>
+#include <inc/llist.h>
+#include <inc/token.h>
+#include <inc/toktype.h>
 
 #include <stdio.h>
 #include <stdlib.h>

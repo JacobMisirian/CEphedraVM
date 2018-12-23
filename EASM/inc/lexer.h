@@ -2,13 +2,13 @@
 #define _LEXER_STATE_H_
 
 #include <ctype.h>
-#include <lib/registers.h>
-#include <lib/instructions.h>
+#include <inc/registers.h>
+#include <inc/instructions.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <lib/token.h>
-#include <lib/toktype.h>
+#include <inc/token.h>
+#include <inc/toktype.h>
 
 typedef struct {
     char * code;

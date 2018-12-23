@@ -1,4 +1,4 @@
-#include <lib/lexer.h>
+#include <inc/lexer.h>
 
 static void lexer_nextstr      (lexerstate_t *, token_t *);
 static void lexer_nextident    (lexerstate_t *, token_t *);

@@ -1,4 +1,4 @@
-#include <lib/cpu.h>
+#include <inc/cpu.h>
 #include <stdio.h>
 #include <stdlib.h>
 

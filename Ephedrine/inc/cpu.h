@@ -1,13 +1,13 @@
 #ifndef _CPU_H_
 #define _CPU_H_
 
-#include <lib/device.h>
-#include <lib/instructions.h>
+#include <inc/device.h>
+#include <inc/instructions.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lib/textscreen.h>
+#include <inc/textscreen.h>
 
 #define INST_SIZE 0x4
 

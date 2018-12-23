@@ -1,7 +1,7 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#include <lib/cpu.h>
+#include <inc/cpu.h>
 
 typedef struct {
     void (* power) (void * cpu);

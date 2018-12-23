@@ -1,4 +1,4 @@
-#include <lib/cpu.h>
+#include <inc/cpu.h>
 
 static void parseinst (uint32_t inst, uint8_t * code, uint8_t * op1, uint8_t * op2, uint16_t * imm);
 

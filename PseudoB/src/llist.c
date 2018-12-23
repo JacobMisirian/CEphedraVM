@@ -1,4 +1,4 @@
-#include <lib/llist.h>
+#include <inc/llist.h>
 
 void llist_free (node_t * root) {
     while (root) {

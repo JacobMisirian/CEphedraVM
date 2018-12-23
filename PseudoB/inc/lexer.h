@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <lib/token.h>
-#include <lib/toktype.h>
+#include <inc/token.h>
+#include <inc/toktype.h>
 
 typedef struct {
     char * code;

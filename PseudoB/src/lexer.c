@@ -1,4 +1,4 @@
-#include <lib/lexer.h>
+#include <inc/lexer.h>
 
 
 static void nextid    (lexerstate_t *, token_t *);

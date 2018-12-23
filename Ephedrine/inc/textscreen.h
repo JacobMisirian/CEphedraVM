@@ -1,8 +1,8 @@
 #ifndef _TEXTSCREEN_H_
 #define _TEXTSCREEN_H_
 
-#include <lib/cpu.h>
-#include <lib/device.h>
+#include <inc/cpu.h>
+#include <inc/device.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

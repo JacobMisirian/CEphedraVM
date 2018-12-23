@@ -1,15 +1,15 @@
 #ifndef _EMIT_H_
 #define _EMIT_H_
 
-#include <lib/instructions.h>
-#include <lib/lexer.h>
-#include <lib/registers.h>
+#include <inc/instructions.h>
+#include <inc/lexer.h>
+#include <inc/registers.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lib/token.h>
-#include <lib/toktype.h>
+#include <inc/token.h>
+#include <inc/toktype.h>
 
 typedef struct {
     uint8_t * bin;

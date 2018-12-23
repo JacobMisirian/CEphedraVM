@@ -1,4 +1,4 @@
-#include <lib/emit.h>
+#include <inc/emit.h>
 
 static uint32_t expectinst (emitstate_t * state);
 static int expectcomma (emitstate_t * state);

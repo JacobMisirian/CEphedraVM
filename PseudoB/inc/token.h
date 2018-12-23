@@ -1,7 +1,7 @@
 #ifndef _TOKEN_H_
 #define _TOKEN_H_
 
-#include <lib/toktype.h>
+#include <inc/toktype.h>
 
 typedef struct {
     char * val;

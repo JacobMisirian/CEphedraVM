@@ -1,4 +1,4 @@
-#include <lib/textscreen.h>
+#include <inc/textscreen.h>
 
 static uint8_t buffer [TEXT_WIDTH * TEXT_HEIGHT];
 
