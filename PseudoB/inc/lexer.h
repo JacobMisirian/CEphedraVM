@@ -10,8 +10,8 @@
 
 typedef struct {
     char * code;
-    uint32_t pos;
-    uint32_t len;
+    int pos;
+    int len;
 } lexerstate_t;
 
 lexerstate_t * lexer_init (FILE * f);
