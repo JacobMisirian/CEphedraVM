@@ -6,8 +6,6 @@
 #include <inc/llist.h>
 #include <stdlib.h>
 
-typedef node_t * llist;
-
 typedef struct {
     astnodetype_t type;
     void * state;
@@ -49,12 +47,19 @@ typedef struct {
     int i;
 } intcstate_t;
 
+typedef struct {
+    astnode_t * cond;
+    astnode_t * body;
+} wloopstate_t;
+
 void astnode_free (astnode_t * node);
 astnode_t * assignnode_init (astnode_t * left, astnode_t * right);
 astnode_t * binopnode_init (binoptype_t type, astnode_t * left, astnode_t * right);
+astnode_t * blocknode_init (llist l);
 astnode_t * charcnode_init (char c);
 astnode_t * condnode_init (astnode_t * cond, astnode_t * body, astnode_t * elsebody);
 astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * repstmt, astnode_t * body);
 astnode_t * intcnode_init (int i);
+astnode_t * wloopnode_init (astnode_t * cond, astnode_t * body);
 
 #endif

@@ -30,6 +30,17 @@ astnode_t * binopnode_init (binoptype_t type, astnode_t * left, astnode_t * righ
     return node;
 }
 
+astnode_t * blocknode_init (llist l) {
+    blockstate_t * state = (blockstate_t *)malloc (sizeof (blockstate_t));
+    state->members = l;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = blocknode;
+
+    return node;
+}
+
 astnode_t * charcnode_init (char c) {
     charcstate_t * state = (charcstate_t *)malloc (sizeof (charcstate_t));
     state->c = c;
@@ -75,6 +86,18 @@ astnode_t * intcnode_init (int i) {
     astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
     node->state = state;
     node->type = intcnode;
+
+    return node;
+}
+
+astnode_t * wloopnode_init (astnode_t * cond, astnode_t * body) {
+    wloopstate_t * state = (wloopstate_t *)malloc (sizeof (wloopstate_t));
+    state->cond = cond;
+    state->body = body;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = wloopnode;
 
     return node;
 }

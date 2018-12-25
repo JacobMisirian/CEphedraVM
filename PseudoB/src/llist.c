@@ -18,6 +18,7 @@ size_t llist_size (node_t * root) {
 }
 
 node_t * llist_add (node_t * root, void * ptr) {
+    node_t * tmp = root;
     if (root == NULL) {
         node_t * ret = (node_t *)calloc (1, sizeof (node_t));
         ret->ptr = ptr;
@@ -30,7 +31,7 @@ node_t * llist_add (node_t * root, void * ptr) {
 
     root->next = (node_t *)calloc (1, sizeof (node_t));
     root->next->ptr = ptr;
-    return root->next;
+    return tmp;
 }
 
 void * llist_get (node_t * root, int i) {

@@ -10,6 +10,8 @@ typedef struct node {
     struct node * next;
 } node_t;
 
+typedef node_t * llist;
+
 void llist_free (node_t * root);
 size_t llist_size (node_t * root);
 node_t * llist_add (node_t * root, void * ptr);
