@@ -188,18 +188,18 @@ static void nextintc (lexerstate_t * state, token_t * token) {
 
 static void nextstrc (lexerstate_t * state, token_t * token) {
     readc (state); // "
-    int size = 1; // size of null-terminated string.
+    int size = 0;
     // count until " is passed.
     while ((char)readc (state) != '"') {
         size++;
     }
 
-    lexer_rewind (state, size); // rewind to first "
+    lexer_rewind (state, size + 1); // rewind to first "
 
     // read string onto heap and null-terminate.
     char * str = (char *)malloc (size);
     int i;
-    for (i = 0; i < size - 1; i++) {
+    for (i = 0; i < size; i++) {
         str [i] = (char)readc (state);
     }
     str [i] = 0;

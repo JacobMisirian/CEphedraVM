@@ -38,7 +38,7 @@ parserstate_t * parser_init (lexerstate_t * lexer) {
     parserstate_t * parser = (parserstate_t *)malloc (sizeof (parserstate_t));
     parser->children = NULL;
     parser->lexer = lexer;
-    parser->tok = (token_t *)malloc (sizeof (token_t));
+    parser->tok = (token_t *)calloc (1, sizeof (token_t));
 
     return parser;
 }

@@ -1,3 +1,4 @@
+#include <inc/emit.h>
 #include <inc/lexer.h>
 #include <inc/llist.h>
 #include <inc/parser.h>
@@ -12,7 +13,7 @@ int main (int argc, char * argv[]) {
     lexerstate_t * lexer = lexer_init (in);
     fclose (in);
 
-    token_t * tok = (token_t *)malloc (sizeof (token_t));
+    token_t * tok = (token_t *)calloc (1, sizeof (token_t));
     do {
         lexer_nexttok (lexer, tok);
         printf ("Type: %d, Val= \"%s\"\n", tok->type, tok->val);
@@ -30,5 +31,11 @@ int main (int argc, char * argv[]) {
         printf ("Child: %d\n", ((astnode_t *)llist_get (parser->children, i))->type);
     }
 
-    lexer_free (lexer);
+    emitstate_t * emit = emit_init (parser);
+
+    emit_run (emit);
+
+    parser_free (parser);
+
+    emit_free (emit);
 }

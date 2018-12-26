@@ -9,6 +9,10 @@
 
 typedef struct {
     llist ast;
+    int curreg;
+    int cursym;
+    llist lblkeys;
+    llist lblvals;
 } emitstate_t;
 
 emitstate_t * emit_init (parserstate_t * parser);
