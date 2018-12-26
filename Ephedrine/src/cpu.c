@@ -56,7 +56,7 @@ void cpu_power (cpustate_t * state) {
                 memcpy ((unsigned char *)buffer, (unsigned char *)&(state->registers [R_IP]), 2);
                 state->ram [state->registers [R_STACK]] = buffer [0];
                 state->ram [state->registers [R_STACK] + 1] = buffer [1];
-                state->registers [R_IP] = imm;
+                state->registers [R_IP] = first;
                 continue;
             case INST_HCF:
                 for (int i = 0; i < 0x10; i++) {
@@ -64,7 +64,7 @@ void cpu_power (cpustate_t * state) {
                 }
                 return;
             case INST_JMP:
-                state->registers[R_IP] = imm;
+                state->registers[R_IP] = first;
                 continue;
             case INST_LB:
                 state->registers [op1] = state->ram [second];
