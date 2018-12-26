@@ -120,6 +120,8 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
             case '*':
             case '/':
             case '%':
+            case '>':
+            case '<':
             token->type = op;
             token->val = (char *)malloc (2);
             token->val [0] = c;

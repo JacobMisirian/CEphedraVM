@@ -1,4 +1,3 @@
-int main () {
-    printf ("Hello, World!");
-    int a = 0;
+if (6 > 1) {
+    printf ("Hello, World!")
 }

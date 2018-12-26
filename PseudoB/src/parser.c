@@ -28,6 +28,12 @@ static const char * expect (parserstate_t *, toktype_t);
 static const char * expectv (parserstate_t *, toktype_t, const char *);
 
 
+static void pause (const char * s) {
+    printf ("%s\n", s);
+    int i;
+    scanf ("%d", &i);
+}
+
 parserstate_t * parser_init (lexerstate_t * lexer) {
     parserstate_t * parser = (parserstate_t *)malloc (sizeof (parserstate_t));
     parser->children = NULL;
@@ -67,8 +73,7 @@ static astnode_t * parsestmt (parserstate_t * state) {
         return parseblock (state);
     }
     else {
-        printf ("Parser error! Unexpected token %d with val '%s'!\n", state->tok->type, state->tok->val);
-        return NULL;
+        return parseexp (state);
     }
 }
 
@@ -76,11 +81,9 @@ static astnode_t * parseblock (parserstate_t * state) {
     expect (state, obrace);
 
     llist l = NULL;
-    do {
+    while (!accept (state, cbrace)) {
         l = llist_add (l, parsestmt (state));
-    } while (!match (state, obrace));
-
-    expect (state, cbrace);
+    }
 
     return blocknode_init (l);
 }
@@ -318,6 +321,7 @@ static astnode_t * parseterm (parserstate_t * state) {
     }
     else {
         printf ("Parser error! Unexpected token %d with val '%s'!\n", state->tok->type, state->tok->val);
+        lexer_nexttok (state->lexer, state->tok);
         return NULL;       
     }
 }
