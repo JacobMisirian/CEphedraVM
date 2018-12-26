@@ -91,6 +91,19 @@ astnode_t * funccallnode_init (astnode_t * target, llist args) {
     return node;
 }
 
+astnode_t * funcdecnode_init (const char * name, llist args, astnode_t * body) {
+    funcdecstate_t * state = (funcdecstate_t *)malloc (sizeof (funcdecstate_t));
+    state->name = name;
+    state->args = args;
+    state->body = body;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = funcdecnode;
+
+    return node;
+}
+
 astnode_t * idnode_init (const char * id) {
     idstate_t * state = (idstate_t *)malloc (sizeof (idstate_t));
     state->id = id;

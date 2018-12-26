@@ -50,6 +50,12 @@ typedef struct {
 } funccallstate_t;
 
 typedef struct {
+    const char * name;
+    llist args;
+    astnode_t * body;
+} funcdecstate_t;
+
+typedef struct {
     const char * id;
 } idstate_t;
 
@@ -88,6 +94,7 @@ astnode_t * charcnode_init (char c);
 astnode_t * condnode_init (astnode_t * cond, astnode_t * body, astnode_t * elsebody);
 astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * repstmt, astnode_t * body);
 astnode_t * funccallnode_init (astnode_t * target, llist args);
+astnode_t * funcdecnode_init (const char * name, llist args, astnode_t * body);
 astnode_t * idnode_init (const char * id);
 astnode_t * intcnode_init (int i);
 astnode_t * retnode_init (astnode_t * val);

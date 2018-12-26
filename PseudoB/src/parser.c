@@ -1,5 +1,6 @@
 #include <inc/parser.h>
 
+static astnode_t * parsefuncdec (parserstate_t *);
 static astnode_t * parsestmt (parserstate_t *);
 static astnode_t * parseblock (parserstate_t *);
 static astnode_t * parsecond (parserstate_t *);
@@ -51,9 +52,19 @@ void parser_parse (parserstate_t * state) {
     do {
         lexer_nexttok (state->lexer, state->tok);
         
-        state->children = llist_add (state->children, parsestmt (state));
+        state->children = llist_add (state->children, parsefuncdec (state));
 
     } while (!match (state, eof));
+}
+
+static astnode_t * parsefuncdec (parserstate_t * state) {
+    char * name = state->tok->val;
+    expect (state, id);
+
+    llist args = parseargs (state);
+    astnode_t * body = parsestmt (state);
+
+    return funcdecnode_init (name, args, body);
 }
 
 static astnode_t * parsestmt (parserstate_t * state) {

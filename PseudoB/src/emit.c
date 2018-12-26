@@ -52,7 +52,26 @@ void emit_run (emitstate_t * state) {
 }
 
 static void hassign (emitstate_t * state, astnode_t * node) {}
-static void hbinop (emitstate_t * state, astnode_t * node) {}
+
+static void hbinop (emitstate_t * state, astnode_t * node) {
+    binopstate_t * binopstate = (binopstate_t *)node->state;
+
+    int r0 = pushreg (state);
+    int r1 = popreg (state);
+
+    handle (state, binopstate->right);
+    handle (state, binopstate->left);
+
+    printf ("pop r%d\n", r0);
+    printf ("pop r%d\n", r1);
+
+    switch (binopstate->type) {
+    case less:
+        printf ("");
+        break;
+    }
+}
+
 static void hblock (emitstate_t * state, astnode_t * node) {
     blockstate_t * blockstate = (blockstate_t *)node->state;
 
@@ -61,7 +80,9 @@ static void hblock (emitstate_t * state, astnode_t * node) {
         handle (state, llist_get (blockstate->members, i));
     }
 }
+
 static void hcharc (emitstate_t * state, astnode_t * node) {}
+
 static void hcond (emitstate_t * state, astnode_t * node) {
     condstate_t * condstate = (condstate_t *)node->state;
 
@@ -86,7 +107,9 @@ static void hcond (emitstate_t * state, astnode_t * node) {
 
     popreg (state);
 }
+
 static void hfloop (emitstate_t * state, astnode_t * node) {}
+
 static void hfunccall (emitstate_t * state, astnode_t * node) {
     funccallstate_t * funccallstate = (funccallstate_t *)node->state;
     
@@ -108,7 +131,16 @@ static void hfunccall (emitstate_t * state, astnode_t * node) {
 
     popreg (state);
 }
-static void hfuncdec (emitstate_t * state, astnode_t * node) {}
+
+static void hfuncdec (emitstate_t * state, astnode_t * node) {
+    funcdecstate_t * funcdecstate = (funcdecstate_t *)node->state;
+
+    printf (".%s\n", funcdecstate->name);
+    printf ("push bp\nld bp, sp\n");
+
+    handle (state, funcdecstate->body);
+}
+
 static void hid (emitstate_t * state, astnode_t * node) {}
 static void hintc (emitstate_t * state, astnode_t * node) {}
 static void hret (emitstate_t * state, astnode_t * node) {}
