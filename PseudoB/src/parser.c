@@ -7,6 +7,9 @@ static astnode_t * parsefloop (parserstate_t *);
 static astnode_t * parseret (parserstate_t *);
 static astnode_t * parsewloop (parserstate_t *);
 static astnode_t * parseexp (parserstate_t *);
+static astnode_t * parseassign (parserstate_t *);
+static astnode_t * parseeq (parserstate_t *);
+static astnode_t * parsecomp (parserstate_t *);
 static astnode_t * parseor (parserstate_t *);
 static astnode_t * parsexor (parserstate_t *);
 static astnode_t * parseand (parserstate_t *);
@@ -133,7 +136,59 @@ static astnode_t * parsewloop (parserstate_t * state) {
 }
 
 static astnode_t * parseexp (parserstate_t * state) {
+    return parseassign (state);
+}
 
+static astnode_t * parseassign (parserstate_t * state) {
+    astnode_t * left = parseeq (state);
+
+    if (accept (state, assign)) {
+        return assignnode_init (left, parseassign (state));
+    }
+
+    return left;
+}
+
+static astnode_t * parseeq (parserstate_t * state) {
+    astnode_t * left = parsecomp (state);
+
+    while (match (state, op)) {
+        if (acceptv (state, op, "==")) {
+            return binopnode_init (eq, left, parseeq (state));
+        }
+        else if (acceptv (state, op, "!=")) {
+            return binopnode_init (neq, left, parseeq (state));
+        }
+        else {
+            break;
+        }
+    }
+
+    return left;
+}
+
+static astnode_t * parsecomp (parserstate_t * state) {
+    astnode_t * left = parseor (state);
+
+    while (match (state, op)) {
+        if (acceptv (state, op, "<")) {
+            return binopnode_init (less, left, parsecomp (state));
+        }
+        else if (acceptv (state, op, "<=")) {
+            return binopnode_init (lesseq, left, parsecomp (state));
+        }
+        else if (acceptv (state, op, ">")) {
+            return binopnode_init (great, left, parsecomp (state));
+        }
+        else if (acceptv (state, op, ">=")) {
+            return binopnode_init (greateq, left, parsecomp (state));
+        }
+        else {
+            break;
+        }
+    }
+
+    return left;
 }
 
 static astnode_t * parseor (parserstate_t * state) {
