@@ -2,7 +2,7 @@
 #define _BIN_OP_TYPE_H_
 
 typedef enum {
-    add, eq, divide, great, greateq, less, lesseq, mod, mul, neq, sub,
+    add, and, eq, divide, great, greateq, less, lesseq, mod, mul, neq, or, shil, shir, sub, xor
 } binoptype_t;
 
 #endif

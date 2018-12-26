@@ -79,6 +79,29 @@ astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * r
     return node;
 }
 
+astnode_t * funccallnode_init (astnode_t * target, llist args) {
+    funccallstate_t * state = (funccallstate_t *)malloc (sizeof (funccallstate_t));
+    state->target = target;
+    state->args = args;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = funccallnode;
+
+    return node;
+}
+
+astnode_t * idnode_init (const char * id) {
+    idstate_t * state = (idstate_t *)malloc (sizeof (idstate_t));
+    state->id = id;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = idnode;
+
+    return node;
+}
+
 astnode_t * intcnode_init (int i) {
     intcstate_t * state = (intcstate_t *)malloc (sizeof (intcstate_t));
     state->i = i;
@@ -86,6 +109,52 @@ astnode_t * intcnode_init (int i) {
     astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
     node->state = state;
     node->type = intcnode;
+
+    return node;
+}
+
+astnode_t * retnode_init (astnode_t * val) {
+    retstate_t * state = (retstate_t *)malloc (sizeof (retstate_t));
+    state->val = val;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = retnode;
+
+    return node;
+}
+
+astnode_t * stringcnode_init (const char * s) {
+    stringcstate_t * state = (stringcstate_t *)malloc (sizeof (stringcstate_t));
+    state->s = s;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = stringcnode;
+
+    return node;
+}
+
+astnode_t * subscrnode_init (astnode_t * target, astnode_t * val) {
+    subscrstate_t * state = (subscrstate_t *)malloc (sizeof (subscrstate_t));
+    state->target = target;
+    state->val = val;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = subscrnode;
+
+    return node;
+}
+
+astnode_t * uopnode_init (uoptype_t type, astnode_t * target) {
+    uopstate_t * state = (uopstate_t *)malloc (sizeof (uopstate_t));
+    state->target = target;
+    state->type = type;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = uopnode;
 
     return node;
 }

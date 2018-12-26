@@ -5,6 +5,7 @@
 #include <inc/binoptype.h>
 #include <inc/llist.h>
 #include <stdlib.h>
+#include <inc/uoptype.h>
 
 typedef struct {
     astnodetype_t type;
@@ -44,8 +45,35 @@ typedef struct {
 } floopstate_t;
 
 typedef struct {
+    astnode_t * target;
+    llist args;
+} funccallstate_t;
+
+typedef struct {
+    const char * id;
+} idstate_t;
+
+typedef struct {
     int i;
 } intcstate_t;
+
+typedef struct {
+    astnode_t * val;
+} retstate_t;
+
+typedef struct {
+    const char * s;
+} stringcstate_t;
+
+typedef struct {
+    astnode_t * target;
+    astnode_t * val;
+} subscrstate_t;
+
+typedef struct {
+    uoptype_t type;
+    astnode_t * target;
+} uopstate_t;
 
 typedef struct {
     astnode_t * cond;
@@ -59,7 +87,13 @@ astnode_t * blocknode_init (llist l);
 astnode_t * charcnode_init (char c);
 astnode_t * condnode_init (astnode_t * cond, astnode_t * body, astnode_t * elsebody);
 astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * repstmt, astnode_t * body);
+astnode_t * funccallnode_init (astnode_t * target, llist args);
+astnode_t * idnode_init (const char * id);
 astnode_t * intcnode_init (int i);
+astnode_t * retnode_init (astnode_t * val);
+astnode_t * stringcnode_init (const char * s);
+astnode_t * subscrnode_init (astnode_t * target, astnode_t * val);
+astnode_t * uopnode_init (uoptype_t type, astnode_t * target);
 astnode_t * wloopnode_init (astnode_t * cond, astnode_t * body);
 
 #endif

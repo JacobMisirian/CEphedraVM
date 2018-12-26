@@ -4,14 +4,25 @@ static astnode_t * parsestmt (parserstate_t *);
 static astnode_t * parseblock (parserstate_t *);
 static astnode_t * parsecond (parserstate_t *);
 static astnode_t * parsefloop (parserstate_t *);
+static astnode_t * parseret (parserstate_t *);
 static astnode_t * parsewloop (parserstate_t *);
 static astnode_t * parseexp (parserstate_t *);
+static astnode_t * parseor (parserstate_t *);
+static astnode_t * parsexor (parserstate_t *);
+static astnode_t * parseand (parserstate_t *);
+static astnode_t * parseshift (parserstate_t *);
+static astnode_t * parseadd (parserstate_t *);
+static astnode_t * parsemul (parserstate_t *);
+static astnode_t * parseuop (parserstate_t *);
+static astnode_t * parseaccess (parserstate_t *, astnode_t *);
+static astnode_t * parseterm (parserstate_t *);
+static llist parseargs (parserstate_t *);
 static int match (parserstate_t *, toktype_t);
 static int matchv (parserstate_t *, toktype_t, const char *);
 static int accept (parserstate_t *, toktype_t);
 static int acceptv (parserstate_t *, toktype_t, const char *);
-static int expect (parserstate_t *, toktype_t);
-static int expectv (parserstate_t *, toktype_t, const char *);
+static const char * expect (parserstate_t *, toktype_t);
+static const char * expectv (parserstate_t *, toktype_t, const char *);
 
 
 parserstate_t * parser_init (lexerstate_t * lexer) {
@@ -42,6 +53,9 @@ static astnode_t * parsestmt (parserstate_t * state) {
     }
     else if (matchv (state, id, "for")) {
         return parsefloop (state);
+    }
+    else if (matchv (state, id, "return")) {
+        return parseret (state);
     }
     else if (matchv (state, id, "while")) {
         return parsewloop (state);
@@ -98,6 +112,14 @@ static astnode_t * parsefloop (parserstate_t * state) {
     return floopnode_init (prestmt, cond, repstmt, body);
 }
 
+static astnode_t * parseret (parserstate_t * state) {
+    expectv (state, id, "return");
+    
+    astnode_t * val = parseexp (state);
+    
+    return retnode_init (val);
+}
+
 static astnode_t * parsewloop (parserstate_t * state) {
     expectv (state, id, "while");
 
@@ -112,6 +134,148 @@ static astnode_t * parsewloop (parserstate_t * state) {
 
 static astnode_t * parseexp (parserstate_t * state) {
 
+}
+
+static astnode_t * parseor (parserstate_t * state) {
+    astnode_t * left = parsexor (state);
+
+    while (acceptv (state, op, "|")) {
+        left = binopnode_init (or, left, parseor (state));
+    }
+
+    return left;
+}
+
+static astnode_t * parsexor (parserstate_t * state) {
+    astnode_t * left = parseand (state);
+
+    while (acceptv (state, op, "^")) {
+        left = binopnode_init (xor, left, parsexor (state));
+    }
+
+    return left;
+}
+
+static astnode_t * parseand (parserstate_t * state) {
+    astnode_t * left = parseshift (state);
+    
+    while (acceptv (state, op, "&")) {
+        left = binopnode_init (and, left, parseand (state));
+    }
+
+    return left;
+}
+
+static astnode_t * parseshift (parserstate_t * state) {
+    astnode_t * left = parseadd (state);
+
+    while (match (state, op)) {
+        if (acceptv (state, op, "<<")) {
+            return binopnode_init (shil, left, parseshift (state));
+        }
+        else if (acceptv (state, op, ">>")) {
+            return binopnode_init (shir, left, parseshift (state));
+        }
+        else {
+            break;
+        }
+    }
+    
+    return left;
+}
+
+static astnode_t * parseadd (parserstate_t * state) {
+    astnode_t * left = parsemul (state);
+
+    while (match (state, op)) {
+        if (acceptv (state, op, "+")) {
+            return binopnode_init (add, left, parseadd (state));
+        }
+        else if (acceptv (state, op, "-")) {
+            return binopnode_init (sub, left, parseadd (state));
+        }
+        else {
+            break;
+        }
+    }
+
+    return left;
+}
+
+static astnode_t * parsemul (parserstate_t * state) {
+    astnode_t * left = parseuop (state);
+
+    while (match (state, op)) {
+        if (acceptv (state, op, "*")) {
+            return binopnode_init (mul, left, parsemul (state));
+        }
+        else if (acceptv (state, op, "/")) {
+            return binopnode_init (divide, left, parsemul (state));
+        }
+        else {
+            break;
+        }
+    }
+
+    return left;
+}
+
+static astnode_t * parseuop (parserstate_t * state) {
+    if (acceptv (state, op, "--")) {
+        return uopnode_init (dec, parseuop (state));
+    }
+    else if (acceptv (state, op, "++")) {
+        return uopnode_init (inc, parseuop (state));
+    }
+    else {
+        return parseaccess (state, NULL);
+    }
+}
+
+static astnode_t * parseaccess (parserstate_t * state, astnode_t * left) {
+    if (left == NULL) left = parseterm (state);
+
+    if (match (state, oparen)) {
+        return parseaccess (state, funccallnode_init (left, parseargs (state)));
+    }
+    else if (accept (state, osquare)) {
+        astnode_t * val = parseexp (state);
+        expect (state, csquare);
+        return parseaccess (state, subscrnode_init (left, val));
+    }
+    else {
+        return left;
+    }
+}
+
+static astnode_t * parseterm (parserstate_t * state) {
+    if (match (state, charc)) {
+        return charcnode_init (expect (state, charc) [0]);
+    }
+    else if (match (state, intc)) {
+        return intcnode_init (atoi (expect (state, intc)));
+    }
+    else if (match (state, stringc)) {
+        return stringcnode_init (expect (state, stringc));
+    }
+    else if (match (state, id)) {
+        return idnode_init (expect (state, id));
+    }
+    else {
+        printf ("Parser error! Unexpected token %d with val '%s'!\n", state->tok->type, state->tok->val);
+        return NULL;       
+    }
+}
+
+static llist parseargs (parserstate_t * state) {
+    expect (state, oparen);
+
+    llist l = NULL;
+    while (!accept (state, cparen)) {
+        l = llist_add (l, parseexp (state));
+    }
+
+    return l;
 }
 
 static int match (parserstate_t * state, toktype_t type) {
@@ -138,22 +302,24 @@ static int acceptv (parserstate_t * state, toktype_t type, const char * val) {
     return 0;
 }
 
-static int expect (parserstate_t * state, toktype_t type) {
+static const char * expect (parserstate_t * state, toktype_t type) {
     if (!match (state, type)) {
         printf ("Parser error! Expected %d, got %d with val '%s'!\n", type, state->tok->type, state->tok->val);
-        return -1;
+        return NULL;
     }
 
+    const char * ret = state->tok->val;
     lexer_nexttok (state->lexer, state->tok);
-    return 1;
+    return ret;
 }
 
-static int expectv (parserstate_t * state, toktype_t type, const char * val) {
+static const char * expectv (parserstate_t * state, toktype_t type, const char * val) {
     if (!matchv (state, type, val)) {
         printf ("Parser error! Expected %d with val '%s', got %d with val '%s'!\n", type, val, state->tok->type, state->tok->val);
-        return -1;
+        return NULL;
     }
-    
+ 
+    const char * ret = state->tok->val;
     lexer_nexttok (state->lexer, state->tok);
-    return 1;
+    return ret;
 }
