@@ -61,8 +61,10 @@ static uint32_t expectinst (emitstate_t * state) {
     if (strcmp (id, "add") == 0 || strcmp (id, "and") == 0 || 
         strcmp (id, "div") == 0 || strcmp (id, "lb") == 0 ||
         strcmp (id, "ld")  == 0 || strcmp (id, "lw") == 0 ||
-        strcmp (id, "mod")  == 0 || strcmp (id, "or") == 0 || strcmp (id, "sb")  == 0 ||
-        strcmp (id, "sw") == 0 || strcmp (id, "sub") == 0 || strcmp (id, "xor") == 0) {
+        strcmp (id, "mod")  == 0 || strcmp (id, "or") == 0 || 
+        strcmp (id, "sb")  == 0 || strcmp (id, "shil") == 0 ||
+        strcmp (id, "shir") == 0 || strcmp (id, "sw") == 0 ||
+        strcmp (id, "sub") == 0 || strcmp (id, "xor") == 0) {
         op1 = expectreg (state);
         expectcomma (state);
         // we need to check 1 token ahead.

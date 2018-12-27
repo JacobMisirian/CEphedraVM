@@ -2,7 +2,7 @@ jmp main
 .end
 hcf
 .main
-ld r0, 5
+ld r0, 105
 ld r1, 5
 sub r1, r0
 jne lbl

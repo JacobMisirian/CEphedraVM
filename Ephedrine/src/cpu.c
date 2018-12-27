@@ -125,6 +125,14 @@ void cpu_power (cpustate_t * state) {
             case INST_SB:
                 state->ram [state->registers [op1]] = second;
                 break;
+            case INST_SHIL:
+                state->ram [state->registers [op1]] <<= second;
+                setflags (state, state->registers [op1]);
+                break;
+            case INST_SHIR:
+                state->ram [state->registers [op1]] >>= second;
+                setflags (state, state->registers [op1]);
+                break;
             case INST_SW:
                 memcpy ((unsigned char *)buffer, (unsigned char *)&(second), 2);
                 state->ram [state->registers [op1]]     = buffer [0];

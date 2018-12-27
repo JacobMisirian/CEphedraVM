@@ -19,8 +19,10 @@
 #define INST_PUSH 0xF
 #define INST_RET 0x10
 #define INST_SB 0x11
-#define INST_SW 0x12
-#define INST_SUB 0x13
-#define INST_XOR 0x14
+#define INST_SHIL 0x12
+#define INST_SHIR 0x13
+#define INST_SW 0x14
+#define INST_SUB 0x15
+#define INST_XOR 0x16
 
 #endif
