@@ -11,8 +11,13 @@
 
 #define INST_SIZE 0x4
 
+#define R_FLAGS 0xC
+#define R_BP 0xD
 #define R_IP 0xE
 #define R_STACK 0XF
+
+#define F_ZERO 0
+#define F_SIGN 1
 
 typedef struct {
     uint8_t * ram;

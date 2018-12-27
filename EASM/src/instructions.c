@@ -1,9 +1,9 @@
 #include <inc/instructions.h>
 
-static char * inst_names[] = { "add", "call", "hcf", "jmp", "lb", "ld", "lw", "mod", "pop", "push", "ret", "sb", "sw", "sub" };
+static char * inst_names[] = { "add", "and", "call", "div", "hcf", "jmp", "lb", "ld", "lw", "mod", "mul", "or", "pop", "push", "ret", "sb", "sw", "sub", "xor" };
 
 int getinst (char * s) {
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 19; i++) {
         if (strcmp (s, inst_names [i]) == 0) {
             return i;
         }
