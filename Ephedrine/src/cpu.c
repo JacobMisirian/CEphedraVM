@@ -77,9 +77,21 @@ void cpu_power (cpustate_t * state) {
                     printf ("Register %d: %d\n", i, state->registers [i]);
                 }
                 return;
+            case INST_JIL:
+                if ((state->registers [R_FLAGS] >> F_SIGN) & 1) {
+                    state->registers [R_IP] = first;
+                    continue;
+                }
+                break;
             case INST_JMP:
-                state->registers[R_IP] = first;
+                state->registers [R_IP] = first;
                 continue;
+            case INST_JNE:
+                if (!((state->registers [R_FLAGS] >> F_ZERO) & 1)) {
+                    state->registers [R_IP] = first;
+                    continue;
+                }
+                break;
             case INST_LB:
                 state->registers [op1] = state->ram [second];
                 break;;

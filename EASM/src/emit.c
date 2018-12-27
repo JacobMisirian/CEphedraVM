@@ -82,7 +82,8 @@ static uint32_t expectinst (emitstate_t * state) {
         op1 = expectreg (state);
     }
     // <op> [<r1>/<int>/<lbl>]
-    else if (strcmp (id, "call") == 0 || strcmp (id, "jmp") == 0 || 
+    else if (strcmp (id, "call") == 0 || strcmp (id, "jil") == 0 ||
+            strcmp (id, "jmp") == 0 || strcmp (id, "jne") == 0 ||
             strcmp (id, "push") == 0) {
         int lexertmp = lexer_gpos (state->lexer);
         lexer_nexttok (state->lexer, state->tok);

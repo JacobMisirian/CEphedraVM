@@ -1,0 +1,21 @@
+ld bp, 1000
+ld sp, 1500
+ld r0, 4000
+push 100
+call printc
+pop r2
+push 98
+call printc
+pop r2
+hcf
+
+
+.printc
+push bp
+ld bp, sp
+add bp, 4
+lw r1, bp
+sb r0, r1
+add r0, 5
+pop bp
+ret
