@@ -1,5 +1,5 @@
 main () {
-    if (6 > 1) {
+    if (1 < 6) {
         printf ("Hello, World!")
     }
 }

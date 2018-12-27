@@ -57,7 +57,7 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
     binopstate_t * binopstate = (binopstate_t *)node->state;
 
     int r0 = pushreg (state);
-    int r1 = popreg (state);
+    int r1 = pushreg (state);
 
     handle (state, binopstate->right);
     handle (state, binopstate->left);
@@ -67,9 +67,14 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
 
     switch (binopstate->type) {
     case less:
-        printf ("");
+        printf ("sub r%d, r%d\n", r0, r1);
+        printf ("shir flags, 1\n");
+        printf ("push flags\n");
         break;
     }
+
+    popreg (state);
+    popreg (state);
 }
 
 static void hblock (emitstate_t * state, astnode_t * node) {
@@ -93,7 +98,7 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     handle (state, condstate->cond);
 
     printf ("pop r%d\n", r);
-    printf ("and r%d, r%d\n", r, r);
+    printf ("sub r%d, r%d\n", r, r);
     printf ("jne %s\n", elselbl);
 
     handle (state, condstate->body);
@@ -142,7 +147,17 @@ static void hfuncdec (emitstate_t * state, astnode_t * node) {
 }
 
 static void hid (emitstate_t * state, astnode_t * node) {}
-static void hintc (emitstate_t * state, astnode_t * node) {}
+
+static void hintc (emitstate_t * state, astnode_t * node) {
+    intcstate_t * instcstate = (intcstate_t *)node->state;
+
+    int r = pushreg (state);
+    printf ("ld r%d, %d\n", r, instcstate->i);
+    printf ("push r%d\n", r);
+
+    popreg (state);
+}
+
 static void hret (emitstate_t * state, astnode_t * node) {}
 
 static void hstringc (emitstate_t * state, astnode_t * node) {
