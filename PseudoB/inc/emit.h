@@ -10,11 +10,11 @@
 #include <stdlib.h>
 
 typedef struct {
-    llist ast;
-    int curreg;
-    int cursym;
+    llist funcs;
     funcdecstate_t * curfunc;
     ldictstate_t * lbls;
+    int curreg;
+    int cursym;
 } emitstate_t;
 
 emitstate_t * emit_init (parserstate_t * parser);

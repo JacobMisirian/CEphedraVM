@@ -12,7 +12,7 @@
 
 typedef struct {
     lexerstate_t * lexer;
-    node_t * children;
+    llist funcs;
     token_t * tok;
     llist locals;
 } parserstate_t;

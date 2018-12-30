@@ -31,7 +31,7 @@ static const char * expectv (parserstate_t *, toktype_t, const char *);
 
 parserstate_t * parser_init (lexerstate_t * lexer) {
     parserstate_t * parser = (parserstate_t *)malloc (sizeof (parserstate_t));
-    parser->children = NULL;
+    parser->funcs = NULL;
     parser->lexer = lexer;
     parser->tok = (token_t *)calloc (1, sizeof (token_t));
     
@@ -45,7 +45,7 @@ void parser_free (parserstate_t * state) {
 void parser_parse (parserstate_t * state) {
     lexer_nexttok (state->lexer, state->tok);
     do {        
-        state->children = llist_add (state->children, parsefuncdec (state));
+        state->funcs = llist_add (state->funcs, parsefuncdec (state));
 
     } while (!match (state, eof));
 }

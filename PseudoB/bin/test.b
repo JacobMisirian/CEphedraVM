@@ -1,7 +1,8 @@
 main () {
-    auto a = 3;
+    putchar (97);
 }
 
 putchar (c) {
-    c;
+    auto a = 4000;
+    *a = c;
 }

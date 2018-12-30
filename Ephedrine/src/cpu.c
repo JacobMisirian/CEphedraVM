@@ -50,7 +50,7 @@ void cpu_power (cpustate_t * state) {
         }
 
         printf ("Int: %u, Opcode %u, Op1: %u, Op2: %u, Imm: %u\n", inst, code, op1, op2, imm);
-
+ 
         switch (code) {
             case INST_ADD:
                 state->registers [op1] += second;

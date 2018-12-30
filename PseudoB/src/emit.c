@@ -25,7 +25,7 @@ static char * gensym (emitstate_t *);
 
 emitstate_t * emit_init (parserstate_t * parser) {
     emitstate_t * state = (emitstate_t *)malloc (sizeof (emitstate_t));
-    state->ast = parser->children;
+    state->funcs = parser->funcs;
     state->curreg = 0;
     state->lbls = ldict_init ();
 
@@ -42,9 +42,9 @@ void emit_run (emitstate_t * state) {
     printf ("call main\n");
     printf ("hcf\n");
 
-    size_t clen = llist_size (state->ast);
+    size_t clen = llist_size (state->funcs);
     for (int i = 0; i < clen; i++) {
-        astnode_t * node = (astnode_t *)llist_get (state->ast, i);
+        astnode_t * node = (astnode_t *)llist_get (state->funcs, i);
         handle (state, node);
     }
 
@@ -140,6 +140,8 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     printf ("sub r%d, r%d\n", r, r);
     printf ("jne %s\n", elselbl);
 
+    popreg (state);
+
     handle (state, condstate->body);
 
     printf ("jmp %s\n", endlbl);
@@ -149,8 +151,6 @@ static void hcond (emitstate_t * state, astnode_t * node) {
 
     printf (".%s\n", endlbl);
     printf ("\n");
-
-    popreg (state);
 }
 
 static void hderef (emitstate_t * state, astnode_t * node) {
@@ -174,7 +174,7 @@ static void hfunccall (emitstate_t * state, astnode_t * node) {
     printf ("pop r%d\n", r);
     printf ("call r%d\n", r);
 
-    for (int i = 0; i < argc; i++) {
+    for (int i = 0; i < argc - 1; i++) {
         printf ("pop r%d\n", r);
     }
 
@@ -206,17 +206,23 @@ static void hid (emitstate_t * state, astnode_t * node) {
 
     int r = pushreg (state);
 
-    printf ("ld r%d, bp\n", r);
-    
     int argi = getargi (state, idstate->id);
-    if (argi == -1) {
-        printf ("sub r%d, %d\n", r, getlocali (state, idstate->id));
+    int locali = getlocali (state, idstate->id);
+
+    if (locali != -1) {
+        printf ("ld r%d, bp\n", r);
+        printf ("sub r%d, %d\n", r, locali);
+        printf ("lw r%d, r%d\n", r, r);
+    }
+    else if (argi != -1) {
+        printf ("ld r%d, bp\n", r);
+        printf ("add r%d, %d\n", r, argi);
+        printf ("lw r%d, r%d\n", r, r);
     }
     else {
-        printf ("add r%d, %d\n", r, argi);
+        printf ("ld r%d, %s\n", r, idstate->id);
     }
 
-    printf ("lw r%d, r%d\n", r, r);
     printf ("push r%d\n", r);
 
     popreg (state);
@@ -230,7 +236,6 @@ static void hintc (emitstate_t * state, astnode_t * node) {
     printf ("push r%d\n", r);
 
     popreg (state);
-    printf ("\n");
 }
 
 static void href (emitstate_t * state, astnode_t * node) {
@@ -325,7 +330,8 @@ static void handle (emitstate_t * state, astnode_t * node) {
 
 static int getargi (emitstate_t * state, const char * id) {
     int i = llist_index (state->curfunc->args, id);   
-    return (i + 1) * 2;
+    if (i == -1) return i;
+    return (i + 2) * 2;
 }
 
 static int getlocali (emitstate_t * state, const char * id) {
