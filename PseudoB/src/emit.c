@@ -124,7 +124,11 @@ static void hblock (emitstate_t * state, astnode_t * node) {
     }
 }
 
-static void hcharc (emitstate_t * state, astnode_t * node) {}
+static void hcharc (emitstate_t * state, astnode_t * node) {
+    charcstate_t * charcstate = (charcstate_t *)node->state;
+
+    printf ("push %d\n", (int)charcstate->c);
+}
 
 static void hcond (emitstate_t * state, astnode_t * node) {
     condstate_t * condstate = (condstate_t *)node->state;
@@ -229,13 +233,9 @@ static void hid (emitstate_t * state, astnode_t * node) {
 }
 
 static void hintc (emitstate_t * state, astnode_t * node) {
-    intcstate_t * instcstate = (intcstate_t *)node->state;
+    intcstate_t * intcstate = (intcstate_t *)node->state;
 
-    int r = pushreg (state);
-    printf ("ld r%d, %d\n", r, instcstate->i);
-    printf ("push r%d\n", r);
-
-    popreg (state);
+    printf ("push %d\n", intcstate->i);
 }
 
 static void href (emitstate_t * state, astnode_t * node) {
