@@ -2,7 +2,7 @@ TARGET   = pseudob
 
 CC       = gcc
 # compiling flags here
-CFLAGS   = -std=c99 -Wall -I.
+CFLAGS   = -std=c99 -Wswitch -I.
 
 LINKER   = gcc
 # linking flags here

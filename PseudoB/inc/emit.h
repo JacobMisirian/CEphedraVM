@@ -3,6 +3,8 @@
 
 #include <inc/astnode.h>
 #include <inc/astnodetype.h>
+#include <inc/binoptype.h>
+#include <inc/ldict.h>
 #include <inc/llist.h>
 #include <inc/parser.h>
 #include <stdlib.h>
@@ -11,8 +13,8 @@ typedef struct {
     llist ast;
     int curreg;
     int cursym;
-    llist lblkeys;
-    llist lblvals;
+    funcdecstate_t * curfunc;
+    ldictstate_t * lbls;
 } emitstate_t;
 
 emitstate_t * emit_init (parserstate_t * parser);

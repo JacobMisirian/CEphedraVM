@@ -6,16 +6,19 @@ static void hbinop (emitstate_t *, astnode_t *);
 static void hblock (emitstate_t *, astnode_t *);
 static void hcharc (emitstate_t *, astnode_t *);
 static void hcond (emitstate_t *, astnode_t *);
+static void hderef (emitstate_t *, astnode_t *);
 static void hfloop (emitstate_t *, astnode_t *);
 static void hfunccall (emitstate_t *, astnode_t *);
 static void hfuncdec (emitstate_t *, astnode_t *);
 static void hid (emitstate_t *, astnode_t *);
 static void hintc (emitstate_t *, astnode_t *);
+static void href (emitstate_t *, astnode_t *);
 static void hret (emitstate_t *, astnode_t *);
 static void hstringc (emitstate_t *, astnode_t *);
 static void hsubscr (emitstate_t *, astnode_t *);
-static void huop (emitstate_t *, astnode_t *);
 static void hwloop (emitstate_t *, astnode_t *);
+static int getargi (emitstate_t *, const char *);
+static int getlocali (emitstate_t *, const char *);
 static int pushreg (emitstate_t *);
 static int popreg (emitstate_t *);
 static char * gensym (emitstate_t *);
@@ -24,34 +27,68 @@ emitstate_t * emit_init (parserstate_t * parser) {
     emitstate_t * state = (emitstate_t *)malloc (sizeof (emitstate_t));
     state->ast = parser->children;
     state->curreg = 0;
-    state->lblkeys = NULL;
-    state->lblvals = NULL;
+    state->lbls = ldict_init ();
 
     return state;
 }
 
 void emit_free (emitstate_t * state) {
-    free (state->lblkeys);
-    free (state->lblvals);
+    ldict_free (state->lbls);
     free (state);
 }
 
 void emit_run (emitstate_t * state) {
+    printf ("ld sp, 2000\n");
+    printf ("call main\n");
+    printf ("hcf\n");
+
     size_t clen = llist_size (state->ast);
     for (int i = 0; i < clen; i++) {
         astnode_t * node = (astnode_t *)llist_get (state->ast, i);
         handle (state, node);
     }
 
-    size_t slen = llist_size (state->lblkeys);
- 
-    for (int i = 0; i < slen; i++) {
-        printf (".%s\n", (char *)llist_get (state->lblkeys, i));
-        printf ("\"%s\"\n", (char *)llist_get (state->lblvals, i));
+    size_t llen = ldict_size (state->lbls);
+
+    for (int i = 0; i < llen; i++) {
+        const char * key = (const char *)llist_get (state->lbls->keys, i);
+        const char * val = (const char *)ldict_getv (state->lbls, (void *)key);
+        printf (".%s\n", key);
+        printf ("\"%s\"\n", val);
     }
 }
 
-static void hassign (emitstate_t * state, astnode_t * node) {}
+static void hassign (emitstate_t * state, astnode_t * node) {
+    assignstate_t * assignstate = (assignstate_t *)node->state;
+
+    int r0 = pushreg (state);
+    int r1 = pushreg (state);
+
+    if (assignstate->left->type == derefnode) {
+        handle (state, ((derefstate_t *)assignstate->left->state)->target);
+        printf ("pop r%d\n", r0);
+    }
+    else if (assignstate->left->type == idnode) {
+        const char * ident = ((idstate_t *)assignstate->left->state)->id;
+        printf ("ld r%d, bp\n", r0);
+
+        int argi = getargi (state, ident);
+        if (argi == -1) {
+            printf ("sub r%d, %d\n", r0, getlocali (state, ident));
+        }
+        else {
+            printf ("add r%d, %d\n", r0, argi);
+        }
+    }   
+    
+    handle (state, assignstate->right);
+        
+    printf ("pop r%d\n", r1);
+    printf ("sw r%d, r%d\n", r0, r1);
+
+    popreg (state);
+    popreg (state);
+}
 
 static void hbinop (emitstate_t * state, astnode_t * node) {
     binopstate_t * binopstate = (binopstate_t *)node->state;
@@ -75,6 +112,7 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
 
     popreg (state);
     popreg (state);
+    printf ("\n");
 }
 
 static void hblock (emitstate_t * state, astnode_t * node) {
@@ -91,9 +129,10 @@ static void hcharc (emitstate_t * state, astnode_t * node) {}
 static void hcond (emitstate_t * state, astnode_t * node) {
     condstate_t * condstate = (condstate_t *)node->state;
 
+    int r = pushreg (state);
+
     char * elselbl = gensym (state);
     char * endlbl = gensym (state);
-    int r = pushreg (state);
 
     handle (state, condstate->cond);
 
@@ -109,8 +148,13 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     handle (state, condstate->elsebody);
 
     printf (".%s\n", endlbl);
+    printf ("\n");
 
     popreg (state);
+}
+
+static void hderef (emitstate_t * state, astnode_t * node) {
+    
 }
 
 static void hfloop (emitstate_t * state, astnode_t * node) {}
@@ -135,24 +179,75 @@ static void hfunccall (emitstate_t * state, astnode_t * node) {
     }
 
     popreg (state);
+    printf ("\n");
 }
 
 static void hfuncdec (emitstate_t * state, astnode_t * node) {
     funcdecstate_t * funcdecstate = (funcdecstate_t *)node->state;
+    state->curfunc = funcdecstate;
+ 
+    int localsize = (int)llist_size (state->curfunc->locals) * 2;
 
     printf (".%s\n", funcdecstate->name);
-    printf ("push bp\nld bp, sp\n");
-
+    printf ("push bp\n");
+    printf ("ld bp, sp\n");
+    printf ("sub sp, %d\n", localsize);
+    
     handle (state, funcdecstate->body);
+    
+    printf ("add sp, %d\n", localsize);
+    printf ("pop bp\n");
+
+    printf ("ret\n");
 }
 
-static void hid (emitstate_t * state, astnode_t * node) {}
+static void hid (emitstate_t * state, astnode_t * node) {
+    idstate_t * idstate = (idstate_t *)node->state;
+
+    int r = pushreg (state);
+
+    printf ("ld r%d, bp\n", r);
+    
+    int argi = getargi (state, idstate->id);
+    if (argi == -1) {
+        printf ("sub r%d, %d\n", r, getlocali (state, idstate->id));
+    }
+    else {
+        printf ("add r%d, %d\n", r, argi);
+    }
+
+    printf ("lw r%d, r%d\n", r, r);
+    printf ("push r%d\n", r);
+
+    popreg (state);
+}
 
 static void hintc (emitstate_t * state, astnode_t * node) {
     intcstate_t * instcstate = (intcstate_t *)node->state;
 
     int r = pushreg (state);
     printf ("ld r%d, %d\n", r, instcstate->i);
+    printf ("push r%d\n", r);
+
+    popreg (state);
+    printf ("\n");
+}
+
+static void href (emitstate_t * state, astnode_t * node) {
+    refstate_t * refstate = (refstate_t *)node->state;
+
+    int r = pushreg (state);
+
+    printf ("ld r%d, bp\n", r);
+
+    int argi = getargi (state, refstate->id);
+    if (argi == -1) {
+        printf ("sub r%d, %d\n", r, getlocali (state, refstate->id));
+    }
+    else {
+        printf ("add r%d, %d\n", r, argi);
+    }
+
     printf ("push r%d\n", r);
 
     popreg (state);
@@ -164,14 +259,14 @@ static void hstringc (emitstate_t * state, astnode_t * node) {
     stringcstate_t * stringcstate = (stringcstate_t *)node->state;
 
     char * sym = gensym (state);
-    state->lblkeys = llist_add (state->lblkeys, sym);
-    state->lblvals = llist_add (state->lblvals, (void *)stringcstate->s);
+    ldict_add (state->lbls, sym, (void *)stringcstate->s);
 
     printf ("push %s\n", sym);
+    printf ("\n");
 }
 
 static void hsubscr (emitstate_t * state, astnode_t * node) {}
-static void huop (emitstate_t * state, astnode_t * node) {}
+
 static void hwloop (emitstate_t * state, astnode_t * node) {}
 
 static void handle (emitstate_t * state, astnode_t * node) {
@@ -192,6 +287,9 @@ static void handle (emitstate_t * state, astnode_t * node) {
     case condnode:
         hcond (state, node);
         break;
+    case derefnode:
+        hderef (state, node);
+        break;
     case floopnode:
         hfloop (state, node);
         break;
@@ -207,6 +305,9 @@ static void handle (emitstate_t * state, astnode_t * node) {
     case intcnode:
         hintc (state, node);
         break;
+    case refnode:
+        href (state, node);
+        break;
     case retnode:
         hret (state, node);
         break;
@@ -216,13 +317,21 @@ static void handle (emitstate_t * state, astnode_t * node) {
     case subscrnode:
         hsubscr (state, node);
         break;
-    case uopnode:
-        huop (state, node);
-        break;
     case wloopnode:
         hwloop (state, node);
         break;
     }
+}
+
+static int getargi (emitstate_t * state, const char * id) {
+    int i = llist_index (state->curfunc->args, id);   
+    return (i + 1) * 2;
+}
+
+static int getlocali (emitstate_t * state, const char * id) {
+    int i = llist_index (state->curfunc->locals, id);
+    if (i == -1) return i;
+    return (i + 1) * 2;
 }
 
 static int pushreg (emitstate_t * state) {

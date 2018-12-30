@@ -3,6 +3,7 @@
 
 #include <inc/astnode.h>
 #include <inc/astnodetype.h>
+#include <inc/ldict.h>
 #include <inc/lexer.h>
 #include <inc/llist.h>
 #include <string.h>
@@ -13,6 +14,7 @@ typedef struct {
     lexerstate_t * lexer;
     node_t * children;
     token_t * tok;
+    llist locals;
 } parserstate_t;
 
 parserstate_t * parser_init (lexerstate_t * lexer);

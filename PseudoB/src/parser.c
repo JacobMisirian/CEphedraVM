@@ -1,6 +1,7 @@
 #include <inc/parser.h>
 
 static astnode_t * parsefuncdec (parserstate_t *);
+static astnode_t * parseauto (parserstate_t *);
 static astnode_t * parsestmt (parserstate_t *);
 static astnode_t * parseblock (parserstate_t *);
 static astnode_t * parsecond (parserstate_t *);
@@ -28,19 +29,12 @@ static int acceptv (parserstate_t *, toktype_t, const char *);
 static const char * expect (parserstate_t *, toktype_t);
 static const char * expectv (parserstate_t *, toktype_t, const char *);
 
-
-static void pause (const char * s) {
-    printf ("%s\n", s);
-    int i;
-    scanf ("%d", &i);
-}
-
 parserstate_t * parser_init (lexerstate_t * lexer) {
     parserstate_t * parser = (parserstate_t *)malloc (sizeof (parserstate_t));
     parser->children = NULL;
     parser->lexer = lexer;
     parser->tok = (token_t *)calloc (1, sizeof (token_t));
-
+    
     return parser;
 }
 
@@ -49,9 +43,8 @@ void parser_free (parserstate_t * state) {
 }
 
 void parser_parse (parserstate_t * state) {
-    do {
-        lexer_nexttok (state->lexer, state->tok);
-        
+    lexer_nexttok (state->lexer, state->tok);
+    do {        
         state->children = llist_add (state->children, parsefuncdec (state));
 
     } while (!match (state, eof));
@@ -61,31 +54,66 @@ static astnode_t * parsefuncdec (parserstate_t * state) {
     char * name = state->tok->val;
     expect (state, id);
 
-    llist args = parseargs (state);
+    expect (state, oparen);
+    
+    llist args = NULL;
+    while (!accept (state, cparen)) {
+        args = llist_add (args, state->tok->val);
+        expect (state, id);
+        if (state->tok->type != cparen) {
+            expect (state, comma);
+        }
+    }
+    state->locals = NULL;
     astnode_t * body = parsestmt (state);
 
-    return funcdecnode_init (name, args, body);
+    return funcdecnode_init (name, args, body, state->locals);
 }
 
 static astnode_t * parsestmt (parserstate_t * state) {
-    if (matchv (state, id, "if")) {
-        return parsecond (state);
+    astnode_t * ret;
+
+    if (matchv (state, id, "auto")) {
+        ret = parseauto (state);
+    }
+    else if (matchv (state, id, "if")) {
+        ret = parsecond (state);
     }
     else if (matchv (state, id, "for")) {
-        return parsefloop (state);
+        ret = parsefloop (state);
     }
     else if (matchv (state, id, "return")) {
-        return parseret (state);
+        ret = parseret (state);
     }
     else if (matchv (state, id, "while")) {
-        return parsewloop (state);
+        ret = parsewloop (state);
     }
     else if (match (state, obrace)) {
         return parseblock (state);
     }
     else {
-        return parseexp (state);
+        ret = parseexp (state);
     }
+
+    if (state->tok->type != eof) {
+        expect (state, semicol);
+    }
+
+    return ret;
+}
+
+static astnode_t * parseauto (parserstate_t * state) {
+    expectv (state, id, "auto");
+    
+    const char * name = state->tok->val;
+    state->locals = llist_add (state->locals, (void *)name);
+    expect (state, id);
+
+    expect (state, assign);
+
+    astnode_t * val = parseexp (state);
+
+    return assignnode_init (idnode_init (name), val);
 }
 
 static astnode_t * parseblock (parserstate_t * state) {
@@ -155,6 +183,10 @@ static astnode_t * parseexp (parserstate_t * state) {
 
 static astnode_t * parseassign (parserstate_t * state) {
     astnode_t * left = parseeq (state);
+    
+    if (match (state, semicol)) {
+        return left;
+    }
 
     if (accept (state, assign)) {
         return assignnode_init (left, parseassign (state));
@@ -290,11 +322,13 @@ static astnode_t * parsemul (parserstate_t * state) {
 }
 
 static astnode_t * parseuop (parserstate_t * state) {
-    if (acceptv (state, op, "--")) {
-        return uopnode_init (dec, parseuop (state));
+    if (acceptv (state, op, "*")) {
+        return derefnode_init (parseuop (state));
     }
-    else if (acceptv (state, op, "++")) {
-        return uopnode_init (inc, parseuop (state));
+    else if (acceptv (state, op, "&")) {
+        const char * target = state->tok->val;
+        expect (state, id);
+        return refnode_init (target);
     }
     else {
         return parseaccess (state, NULL);
@@ -340,9 +374,11 @@ static astnode_t * parseterm (parserstate_t * state) {
 static llist parseargs (parserstate_t * state) {
     expect (state, oparen);
 
-    llist l = NULL;
+    llist l = (llist)calloc (1, sizeof (node_t));
+
     while (!accept (state, cparen)) {
         l = llist_add (l, parseexp (state));
+        accept (state, comma);
     }
 
     return l;

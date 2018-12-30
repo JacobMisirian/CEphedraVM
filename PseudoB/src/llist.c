@@ -1,5 +1,6 @@
 #include <inc/llist.h>
 
+
 void llist_free (node_t * root) {
     while (root) {
         node_t * tmp = root;
@@ -10,10 +11,12 @@ void llist_free (node_t * root) {
 
 size_t llist_size (node_t * root) {
     size_t size = 0;
+
     while (root) {
         size++;
         root = root->next;
     }
+
     return size;
 }
 
@@ -39,4 +42,14 @@ void * llist_get (node_t * root, int i) {
         root = root->next;
     }
     return root->ptr;
+}
+
+int llist_index (node_t * root, const char * ptr) {
+    size_t size = llist_size (root);
+    for (int i = 0; i < size; i++) {
+        if (strcmp ((const char *)llist_get (root, i), ptr) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }

@@ -1,14 +1,27 @@
-jmp main
-.end
+ld sp, 2000
+call main
 hcf
 .main
-ld r0, 105
-ld r1, 5
-sub r1, r0
-jne lbl
-jmp end
+push bp
+ld bp, sp
+sub sp, 2
+ld r0, bp
+sub r0, 2
+ld r2, 4000
+push r2
 
+pop r1
+sw r0, r1
+ld r2, bp
+sub r2, 2
+lw r2, r2
+push r2
+pop r0
+ld r2, 97
+push r2
 
-.lbl
-ld r6, 420
-jmp end
+pop r1
+sw r0, r1
+add sp, 2
+pop bp
+ret
