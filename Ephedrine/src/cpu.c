@@ -126,11 +126,11 @@ void cpu_power (cpustate_t * state) {
                 state->ram [state->registers [op1]] = second;
                 break;
             case INST_SHIL:
-                state->ram [state->registers [op1]] <<= second;
+                state->registers [op1] <<= second;
                 setflags (state, state->registers [op1]);
                 break;
             case INST_SHIR:
-                state->ram [state->registers [op1]] >>= second;
+                state->registers [op1] >>= second;
                 setflags (state, state->registers [op1]);
                 break;
             case INST_SW:
@@ -150,14 +150,13 @@ void cpu_power (cpustate_t * state) {
 }
 
 static void setflags (cpustate_t * state, uint16_t val) {
-    state->registers [R_FLAGS] |= (1 << F_ZERO);
-    state->registers [R_FLAGS] |= (1 << F_SIGN);
+    state->registers [R_FLAGS] = 0;
 
-    if (val != 0) {
-        state->registers [R_FLAGS] ^= (1 << F_ZERO);
+    if (val == 0) {
+       state->registers [R_FLAGS] |= (1 << F_ZERO);
     }
-    if ((int16_t)val > 0) {
-        state->registers [R_FLAGS] ^= (1 << F_SIGN);
+    if ((int16_t)val < 0) {
+       state->registers [R_FLAGS] |= (1 << F_SIGN);
     }
 }
 

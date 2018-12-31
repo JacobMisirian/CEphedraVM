@@ -103,10 +103,39 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
     printf ("pop r%d\n", r1);
 
     switch (binopstate->type) {
+    case add:
+        printf ("add r%d, r%d\n", r0, r1);
+        printf ("push r%d\n", r0);
+        break;
+    case and:
+        printf ("and r%d, r%d\n", r0, r1);
+        printf ("push r%d\n", r0);
+        break;
+    case eq:
+        printf ("sub r%d, r%d\n", r0, r1);
+        printf ("ld r%d, flags\n", r0);
+        printf ("and r%d, 1\n", r0);
+        printf ("push r%d\n", r0);
+        break;
+    case divide:
+        printf ("div r%d, r%d\n", r0, r1);
+        printf ("push r%d\n", r0);
+        break;
+    case great:
+        printf ("sub r%d, r%d\n", r1, r0);
+        printf ("ld r%d, flags\n", r0);
+        printf ("shir r%d, 1\n", r0);
+        printf ("push r%d\n", r0);
+        break;
+    case greateq:
+        printf ("sub r%d, r%d\n", r1, r0);
+        printf ("ld r%d, flags\n", r0);
+        break;
     case less:
         printf ("sub r%d, r%d\n", r0, r1);
-        printf ("shir flags, 1\n");
-        printf ("push flags\n");
+        printf ("ld r%d, flags\n", r0);
+        printf ("shir r%d, 1\n", r0);
+        printf ("push r%d\n", r0);
         break;
     }
 
