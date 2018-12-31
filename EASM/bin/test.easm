@@ -1,42 +1,12 @@
 ld sp, 2000
 call main
 hcf
-.main
-push bp
-ld bp, sp
-sub sp, 0
-ld r1, 97
-push r1
-ld r1, putchar
-push r1
-pop r0
-call r0
-pop r0
 
-add sp, 0
-pop bp
-ret
-.putchar
-push bp
-ld bp, sp
-sub sp, 2
-ld r0, bp
-sub r0, 2
-ld r2, 4000
-push r2
-pop r1
-sw r0, r1
-ld r2, bp
-sub r2, 2
-lw r2, r2
-push r2
-pop r0
-ld r2, bp
-add r2, 4
-lw r2, r2
-push r2
-pop r1
-sw r0, r1
-add sp, 2
-pop bp
+.main
+ld r0, 10
+ld r1, 15
+
+sub r0, r1
+ld r2, flags
+
 ret
