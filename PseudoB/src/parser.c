@@ -96,7 +96,7 @@ static astnode_t * parsestmt (parserstate_t * state) {
     }
 
     if (state->tok->type != eof) {
-        expect (state, semicol);
+        accept (state, semicol);
     }
 
     return ret;

@@ -1,8 +1,12 @@
 main () {
-    putchar (97);
+    if (3 < 4) {
+        putchar (4001, 101);
+    }
+    else {
+        putchar (4002, 98);
+    }
 }
 
-putchar (c) {
-    auto a = 4000;
-    *a = c;
+putchar (l, c) {
+    *l = c;
 }

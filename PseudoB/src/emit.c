@@ -130,11 +130,19 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
     case greateq:
         printf ("sub r%d, r%d\n", r1, r0);
         printf ("ld r%d, flags\n", r0);
+        printf ("and r%d, 3\n", r0);
+        printf ("push r%d\n");
         break;
     case less:
         printf ("sub r%d, r%d\n", r0, r1);
         printf ("ld r%d, flags\n", r0);
         printf ("shir r%d, 1\n", r0);
+        printf ("push r%d\n", r0);
+        break;
+    case lesseq:
+        printf ("sub r%d, r%d\n", r0, r1);
+        printf ("ld r%d, flags\n", r0);
+        printf ("and r%d, 3\n", r0);
         printf ("push r%d\n", r0);
         break;
     }
@@ -170,7 +178,7 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     handle (state, condstate->cond);
 
     printf ("pop r%d\n", r);
-    printf ("sub r%d, r%d\n", r, r);
+    printf ("sub r%d, 1\n", r);
     printf ("jne %s\n", elselbl);
 
     popreg (state);

@@ -1,12 +1,62 @@
 ld sp, 2000
 call main
 hcf
-
 .main
-ld r0, 10
-ld r1, 15
+push bp
+ld bp, sp
+sub sp, 0
+push 4
+push 3
+pop r1
+pop r2
+sub r1, r2
+ld r1, flags
+shir r1, 1
+push r1
 
-sub r0, r1
-ld r2, flags
+pop r0
+sub r0, 1
+jne sym0
+push 101
+push 4001
+ld r1, putchar
+push r1
+pop r0
+call r0
+pop r0
+pop r0
 
+jmp sym1
+.sym0
+push 98
+push 4002
+ld r1, putchar
+push r1
+pop r0
+call r0
+pop r0
+pop r0
+
+.sym1
+
+add sp, 0
+pop bp
+ret
+.putchar
+push bp
+ld bp, sp
+sub sp, 0
+ld r2, bp
+add r2, 4
+lw r2, r2
+push r2
+pop r0
+ld r2, bp
+add r2, 6
+lw r2, r2
+push r2
+pop r1
+sw r0, r1
+add sp, 0
+pop bp
 ret
