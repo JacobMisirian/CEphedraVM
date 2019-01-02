@@ -309,7 +309,27 @@ static void hstringc (emitstate_t * state, astnode_t * node) {
 
 static void hsubscr (emitstate_t * state, astnode_t * node) {}
 
-static void hwloop (emitstate_t * state, astnode_t * node) {}
+static void hwloop (emitstate_t * state, astnode_t * node) {
+    wloopstate_t * wloopstate = (wloopstate_t *)node->state;
+
+    char * loopsym = gensym (state);
+    char * endsym = gensym (state);
+
+    printf (".%s\n", loopsym);
+
+    handle (state, wloopstate->cond);
+    int r = pushreg (state);
+
+    printf ("pop r%d\n", r);
+    printf ("sub r%d, 1\n", r);
+    printf ("jne %s\n", endsym);
+
+    popreg (state);
+    handle (state, wloopstate->body);
+
+    printf ("jmp %s\n", loopsym);
+    printf (".%s\n", endsym);
+}
 
 static void handle (emitstate_t * state, astnode_t * node) {
     if (node == NULL) return;

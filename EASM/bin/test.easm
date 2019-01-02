@@ -4,21 +4,47 @@ hcf
 .main
 push bp
 ld bp, sp
-sub sp, 0
-push 4
-push 3
+sub sp, 4
+ld r0, bp
+sub r0, 2
+push 97
 pop r1
-pop r2
-sub r1, r2
-ld r1, flags
-shir r1, 1
-push r1
+sw r0, r1
+ld r0, bp
+sub r0, 4
+push 0
+pop r1
+sw r0, r1
+.sym0
+push 100
+ld r2, bp
+sub r2, 2
+lw r2, r2
+push r2
+pop r0
+pop r1
+sub r0, r1
+ld r0, flags
+shir r0, 1
+push r0
 
 pop r0
 sub r0, 1
-jne sym0
-push 101
-push 4001
+jne sym1
+ld r1, bp
+sub r1, 2
+lw r1, r1
+push r1
+ld r3, bp
+sub r3, 4
+lw r3, r3
+push r3
+push 4000
+pop r1
+pop r2
+add r1, r2
+push r1
+
 ld r1, putchar
 push r1
 pop r0
@@ -26,20 +52,37 @@ call r0
 pop r0
 pop r0
 
-jmp sym1
-.sym0
-push 98
-push 4002
-ld r1, putchar
-push r1
-pop r0
-call r0
-pop r0
-pop r0
+ld r0, bp
+sub r0, 2
+push 1
+ld r4, bp
+sub r4, 2
+lw r4, r4
+push r4
+pop r2
+pop r3
+add r2, r3
+push r2
 
+pop r1
+sw r0, r1
+ld r0, bp
+sub r0, 4
+push 1
+ld r4, bp
+sub r4, 4
+lw r4, r4
+push r4
+pop r2
+pop r3
+add r2, r3
+push r2
+
+pop r1
+sw r0, r1
+jmp sym0
 .sym1
-
-add sp, 0
+add sp, 4
 pop bp
 ret
 .putchar
