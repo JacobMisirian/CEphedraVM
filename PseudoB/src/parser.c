@@ -375,6 +375,11 @@ static astnode_t * parseterm (parserstate_t * state) {
     else if (accept (state, semicol)) {
         return dummynode_init ();
     }
+    else if (accept (state, oparen)) {
+        astnode_t * exp = parseexp (state);
+        expect (state, cparen);
+        return exp;
+    }
     else {
         printf ("Parser error! Unexpected token %d with val '%s'!\n", state->tok->type, state->tok->val);
         lexer_nexttok (state->lexer, state->tok);

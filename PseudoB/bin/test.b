@@ -1,10 +1,7 @@
 main () {
-    for (auto c = 0; c < 10; c = c + 1) {
-        if (c > 3) {
-            break;
-        }
-    }
-    putchar (4000, 'a' + c);
+    auto a = "HEllo, World!";
+    putchar (4000, *a);
+    putchar (4005, *(a + 1));
 }
 
 putchar (loc, c) {
