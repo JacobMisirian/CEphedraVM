@@ -190,7 +190,15 @@ static void hcond (emitstate_t * state, astnode_t * node) {
 }
 
 static void hderef (emitstate_t * state, astnode_t * node) {
-    
+    derefstate_t * derefstate = (derefstate_t *)node->state;
+
+    int r;
+
+    handle (state, derefstate->target);
+    r = popreg (state);
+
+    printf ("lw r%d, r%d\n", r, r);
+    pushreg (state);
 }
 
 static void hfloop (emitstate_t * state, astnode_t * node) {}
@@ -288,8 +296,11 @@ static void hret (emitstate_t * state, astnode_t * node) {}
 static void hstringc (emitstate_t * state, astnode_t * node) {
     stringcstate_t * stringcstate = (stringcstate_t *)node->state;
 
-    char * sym = gensym (state);
-    ldict_add (state->lbls, sym, (void *)stringcstate->s);
+    char * sym = ldict_getk (state->lbls, (void *)stringcstate->s);
+    if (sym == NULL) {
+        sym = gensym (state);
+        ldict_add (state->lbls, sym, (void *)stringcstate->s);
+    }
 
     printf ("ld r%d, %s\n", pushreg (state), sym);
 }
