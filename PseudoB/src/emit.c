@@ -4,8 +4,10 @@ static void handle (emitstate_t *, astnode_t *);
 static void hassign (emitstate_t *, astnode_t *);
 static void hbinop (emitstate_t *, astnode_t *);
 static void hblock (emitstate_t *, astnode_t *);
+static void hbreak (emitstate_t *, astnode_t *);
 static void hcharc (emitstate_t *, astnode_t *);
 static void hcond (emitstate_t *, astnode_t *);
+static void hcont (emitstate_t *, astnode_t *);
 static void hderef (emitstate_t *, astnode_t *);
 static void hfloop (emitstate_t *, astnode_t *);
 static void hfunccall (emitstate_t *, astnode_t *);
@@ -29,6 +31,8 @@ emitstate_t * emit_init (parserstate_t * parser) {
     state->funcs = parser->funcs;
     state->curreg = 0;
     state->lbls = ldict_init ();
+    state->breakstack = lstack_init ();
+    state->contstack = lstack_init ();
 
     return state;
 }
@@ -159,6 +163,12 @@ static void hblock (emitstate_t * state, astnode_t * node) {
     }
 }
 
+static void hbreak (emitstate_t * state, astnode_t * node) {
+    char * endsym = lstack_peek (state->breakstack);
+
+    printf ("jmp %s\n", endsym);
+}
+
 static void hcharc (emitstate_t * state, astnode_t * node) {
     charcstate_t * charcstate = (charcstate_t *)node->state;
 
@@ -189,6 +199,12 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     printf (".%s\n", endlbl);
 }
 
+static void hcont (emitstate_t * state, astnode_t * node) {
+    char * loopsym = (char *)lstack_peek (state->contstack);
+
+    printf ("jmp %s\n", loopsym);
+}
+
 static void hderef (emitstate_t * state, astnode_t * node) {
     derefstate_t * derefstate = (derefstate_t *)node->state;
 
@@ -207,6 +223,9 @@ static void hfloop (emitstate_t * state, astnode_t * node) {
     char * loopsym = gensym (state);
     char * endsym = gensym (state);
 
+    lstack_push (state->breakstack, (void *)endsym);
+    lstack_push (state->contstack, (void *)loopsym);
+
     handle (state, floopstate->prestmt);
 
     printf (".%s\n", loopsym);
@@ -222,6 +241,9 @@ static void hfloop (emitstate_t * state, astnode_t * node) {
 
     printf ("jmp %s\n", loopsym);
     printf (".%s\n", endsym);
+
+    lstack_pop (state->breakstack);
+    lstack_pop (state->contstack);
 }
 
 static void hfunccall (emitstate_t * state, astnode_t * node) {
@@ -360,11 +382,17 @@ static void handle (emitstate_t * state, astnode_t * node) {
     case blocknode:
         hblock (state, node);
         break;
+    case breaknode:
+        hbreak (state, node);
+        break;
     case charcnode:
         hcharc (state, node);
         break;
     case condnode:
         hcond (state, node);
+        break;
+    case contnode:
+        hcont (state, node);
         break;
     case derefnode:
         hderef (state, node);

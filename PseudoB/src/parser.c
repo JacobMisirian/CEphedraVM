@@ -76,6 +76,12 @@ static astnode_t * parsestmt (parserstate_t * state) {
     if (matchv (state, id, "auto")) {
         ret = parseauto (state);
     }
+    else if (acceptv (state, id, "break")) {
+        return breaknode_init ();
+    }
+    else if (acceptv (state, id, "continue")) {
+        return contnode_init ();
+    }
     else if (matchv (state, id, "if")) {
         ret = parsecond (state);
     }
@@ -365,6 +371,9 @@ static astnode_t * parseterm (parserstate_t * state) {
     }
     else if (match (state, id)) {
         return idnode_init (expect (state, id));
+    }
+    else if (accept (state, semicol)) {
+        return dummynode_init ();
     }
     else {
         printf ("Parser error! Unexpected token %d with val '%s'!\n", state->tok->type, state->tok->val);

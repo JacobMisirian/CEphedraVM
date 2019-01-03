@@ -41,6 +41,13 @@ astnode_t * blocknode_init (llist l) {
     return node;
 }
 
+astnode_t * breaknode_init () {
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->type = breaknode;
+
+    return node;
+}
+
 astnode_t * charcnode_init (char c) {
     charcstate_t * state = (charcstate_t *)malloc (sizeof (charcstate_t));
     state->c = c;
@@ -65,6 +72,13 @@ astnode_t * condnode_init (astnode_t * cond_, astnode_t * body, astnode_t * else
     return node;
 }
 
+astnode_t * contnode_init () {
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->type = contnode;
+
+    return node;
+}
+
 astnode_t * derefnode_init (astnode_t * target) {
     derefstate_t * state = (derefstate_t *)malloc (sizeof (derefstate_t));
     state->target = target;
@@ -72,6 +86,13 @@ astnode_t * derefnode_init (astnode_t * target) {
     astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
     node->state = state;
     node->type = derefnode;
+
+    return node;
+}
+
+astnode_t * dummynode_init () {
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->type = dummynode;
 
     return node;
 }
