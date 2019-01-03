@@ -21,6 +21,7 @@ static int getargi (emitstate_t *, const char *);
 static int getlocali (emitstate_t *, const char *);
 static int pushreg (emitstate_t *);
 static int popreg (emitstate_t *);
+static int peekreg (emitstate_t *);
 static char * gensym (emitstate_t *);
 
 emitstate_t * emit_init (parserstate_t * parser) {
@@ -61,17 +62,22 @@ void emit_run (emitstate_t * state) {
 static void hassign (emitstate_t * state, astnode_t * node) {
     assignstate_t * assignstate = (assignstate_t *)node->state;
 
-    int r0 = pushreg (state);
-    int r1 = pushreg (state);
+    int r0, r1;
 
     if (assignstate->left->type == derefnode) {
         handle (state, ((derefstate_t *)assignstate->left->state)->target);
-        printf ("pop r%d\n", r0);
+        handle (state, assignstate->right);
+        r1 = popreg (state);
+        r0 = popreg (state);
+
+        printf ("sw r%d, r%d\n", r0, r1);
     }
     else if (assignstate->left->type == idnode) {
         const char * ident = ((idstate_t *)assignstate->left->state)->id;
-        printf ("ld r%d, bp\n", r0);
+        r0 = pushreg (state);
 
+        printf ("ld r%d, bp\n", r0);
+        
         int argi = getargi (state, ident);
         if (argi == -1) {
             printf ("sub r%d, %d\n", r0, getlocali (state, ident));
@@ -79,77 +85,69 @@ static void hassign (emitstate_t * state, astnode_t * node) {
         else {
             printf ("add r%d, %d\n", r0, argi);
         }
-    }   
-    
-    handle (state, assignstate->right);
-        
-    printf ("pop r%d\n", r1);
-    printf ("sw r%d, r%d\n", r0, r1);
 
-    popreg (state);
-    popreg (state);
+        handle (state, assignstate->right);
+        r1 = popreg (state);
+
+        printf ("sw r%d, r%d\n", r0, r1);
+        popreg (state); // pop r0
+    }
 }
 
 static void hbinop (emitstate_t * state, astnode_t * node) {
     binopstate_t * binopstate = (binopstate_t *)node->state;
 
-    int r0 = pushreg (state);
-    int r1 = pushreg (state);
+    int r0, r1;
 
+    handle (state, binopstate->left);   
     handle (state, binopstate->right);
-    handle (state, binopstate->left);
-
-    printf ("pop r%d\n", r0);
-    printf ("pop r%d\n", r1);
+    r1 = popreg (state);
+    r0 = popreg (state);
 
     switch (binopstate->type) {
     case add:
         printf ("add r%d, r%d\n", r0, r1);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case and:
         printf ("and r%d, r%d\n", r0, r1);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case eq:
         printf ("sub r%d, r%d\n", r0, r1);
         printf ("ld r%d, flags\n", r0);
         printf ("and r%d, 1\n", r0);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case divide:
         printf ("div r%d, r%d\n", r0, r1);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case great:
         printf ("sub r%d, r%d\n", r1, r0);
         printf ("ld r%d, flags\n", r0);
         printf ("shir r%d, 1\n", r0);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case greateq:
         printf ("sub r%d, r%d\n", r1, r0);
         printf ("ld r%d, flags\n", r0);
         printf ("and r%d, 3\n", r0);
-        printf ("push r%d\n");
+        pushreg (state);
         break;
     case less:
         printf ("sub r%d, r%d\n", r0, r1);
         printf ("ld r%d, flags\n", r0);
         printf ("shir r%d, 1\n", r0);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     case lesseq:
         printf ("sub r%d, r%d\n", r0, r1);
         printf ("ld r%d, flags\n", r0);
         printf ("and r%d, 3\n", r0);
-        printf ("push r%d\n", r0);
+        pushreg (state);
         break;
     }
-
-    popreg (state);
-    popreg (state);
-    printf ("\n");
 }
 
 static void hblock (emitstate_t * state, astnode_t * node) {
@@ -164,24 +162,22 @@ static void hblock (emitstate_t * state, astnode_t * node) {
 static void hcharc (emitstate_t * state, astnode_t * node) {
     charcstate_t * charcstate = (charcstate_t *)node->state;
 
-    printf ("push %d\n", (int)charcstate->c);
+    printf ("ld r%d, %d\n", pushreg (state), (int)charcstate->c);
 }
 
 static void hcond (emitstate_t * state, astnode_t * node) {
     condstate_t * condstate = (condstate_t *)node->state;
 
-    int r = pushreg (state);
+    int r;
 
     char * elselbl = gensym (state);
     char * endlbl = gensym (state);
 
     handle (state, condstate->cond);
+    r = popreg (state);
 
-    printf ("pop r%d\n", r);
     printf ("sub r%d, 1\n", r);
     printf ("jne %s\n", elselbl);
-
-    popreg (state);
 
     handle (state, condstate->body);
 
@@ -191,7 +187,6 @@ static void hcond (emitstate_t * state, astnode_t * node) {
     handle (state, condstate->elsebody);
 
     printf (".%s\n", endlbl);
-    printf ("\n");
 }
 
 static void hderef (emitstate_t * state, astnode_t * node) {
@@ -203,24 +198,26 @@ static void hfloop (emitstate_t * state, astnode_t * node) {}
 static void hfunccall (emitstate_t * state, astnode_t * node) {
     funccallstate_t * funccallstate = (funccallstate_t *)node->state;
     
-    int r = pushreg (state);
+    int r0, r1;
 
     size_t argc = llist_size (funccallstate->args);
     for (int i = argc - 1; i >= 0; i--) {
-        handle (state, (astnode_t *)llist_get (funccallstate->args, i));
+        astnode_t * arg = (astnode_t *)llist_get (funccallstate->args, i);
+        if (arg != NULL) {
+            handle (state, arg);
+            r0 = popreg (state);
+            printf ("push r%d\n", r0);
+        }
     }
 
     handle (state, funccallstate->target);
-    
-    printf ("pop r%d\n", r);
-    printf ("call r%d\n", r);
+    r1 = popreg (state);
+
+    printf ("call r%d\n", r1);
 
     for (int i = 0; i < argc - 1; i++) {
-        printf ("pop r%d\n", r);
+        printf ("pop r%d\n", r1);
     }
-
-    popreg (state);
-    printf ("\n");
 }
 
 static void hfuncdec (emitstate_t * state, astnode_t * node) {
@@ -246,7 +243,6 @@ static void hid (emitstate_t * state, astnode_t * node) {
     idstate_t * idstate = (idstate_t *)node->state;
 
     int r = pushreg (state);
-
     int argi = getargi (state, idstate->id);
     int locali = getlocali (state, idstate->id);
 
@@ -263,16 +259,12 @@ static void hid (emitstate_t * state, astnode_t * node) {
     else {
         printf ("ld r%d, %s\n", r, idstate->id);
     }
-
-    printf ("push r%d\n", r);
-
-    popreg (state);
 }
 
 static void hintc (emitstate_t * state, astnode_t * node) {
     intcstate_t * intcstate = (intcstate_t *)node->state;
 
-    printf ("push %d\n", intcstate->i);
+    printf ("ld r%d, %d\n", pushreg (state), intcstate->i);
 }
 
 static void href (emitstate_t * state, astnode_t * node) {
@@ -289,10 +281,6 @@ static void href (emitstate_t * state, astnode_t * node) {
     else {
         printf ("add r%d, %d\n", r, argi);
     }
-
-    printf ("push r%d\n", r);
-
-    popreg (state);
 }
 
 static void hret (emitstate_t * state, astnode_t * node) {}
@@ -303,8 +291,7 @@ static void hstringc (emitstate_t * state, astnode_t * node) {
     char * sym = gensym (state);
     ldict_add (state->lbls, sym, (void *)stringcstate->s);
 
-    printf ("push %s\n", sym);
-    printf ("\n");
+    printf ("ld r%d, %s\n", pushreg (state), sym);
 }
 
 static void hsubscr (emitstate_t * state, astnode_t * node) {}
@@ -318,13 +305,11 @@ static void hwloop (emitstate_t * state, astnode_t * node) {
     printf (".%s\n", loopsym);
 
     handle (state, wloopstate->cond);
-    int r = pushreg (state);
+    int r = popreg (state);
 
-    printf ("pop r%d\n", r);
     printf ("sub r%d, 1\n", r);
     printf ("jne %s\n", endsym);
 
-    popreg (state);
     handle (state, wloopstate->body);
 
     printf ("jmp %s\n", loopsym);
@@ -403,6 +388,10 @@ static int pushreg (emitstate_t * state) {
 
 static int popreg (emitstate_t * state) {
     return --state->curreg;
+}
+
+static int peekreg (emitstate_t * state) {
+    return state->curreg;
 }
 
 static char * gensym (emitstate_t * state) {

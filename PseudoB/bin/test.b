@@ -1,13 +1,11 @@
 main () {
-    auto a = 97;
-    auto b = 0;
-    while (a < 100) {
-        putchar (4000 + b, a);
-        a = a + 1;
-        b = b + 1;
+    auto c = 0;
+    while (c < 10) {
+        putchar (4000 + c, 'A' + c);
+        c = c + 1;
     }
 }
 
-putchar (l, c) {
-    *l = c;
+putchar (loc, c) {
+    *loc = c;
 }
