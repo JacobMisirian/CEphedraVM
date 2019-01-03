@@ -41,6 +41,10 @@ typedef struct {
 } derefstate_t;
 
 typedef struct {
+    astnode_t * exp;
+} expstmtstate_t;
+
+typedef struct {
     astnode_t * prestmt;
     astnode_t * cond;
     astnode_t * repstmt;
@@ -99,6 +103,7 @@ astnode_t * condnode_init (astnode_t * cond, astnode_t * body, astnode_t * elseb
 astnode_t * contnode_init ();
 astnode_t * derefnode_init (astnode_t * target);
 astnode_t * dummynode_init ();
+astnode_t * expstmtnode_init (astnode_t * exp);
 astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * repstmt, astnode_t * body);
 astnode_t * funccallnode_init (astnode_t * target, llist args);
 astnode_t * funcdecnode_init (const char * name, llist args, astnode_t * body, llist locals);

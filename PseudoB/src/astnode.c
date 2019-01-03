@@ -97,6 +97,17 @@ astnode_t * dummynode_init () {
     return node;
 }
 
+astnode_t * expstmtnode_init (astnode_t * exp) {
+    expstmtstate_t * state = (expstmtstate_t *)malloc (sizeof (expstmtstate_t));
+    state->exp = exp;
+
+    astnode_t * node = (astnode_t *)malloc (sizeof (astnode_t));
+    node->state = state;
+    node->type = expstmtnode;
+
+    return node;
+}
+
 astnode_t * floopnode_init (astnode_t * prestmt, astnode_t * cond, astnode_t * repstmt, astnode_t * body) {
     floopstate_t * state = (floopstate_t *)malloc (sizeof (floopstate_t));
     state->prestmt = prestmt;

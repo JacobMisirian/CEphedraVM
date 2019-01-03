@@ -11,6 +11,7 @@ static astnode_t * parsewloop (parserstate_t *);
 static astnode_t * parseexp (parserstate_t *);
 static astnode_t * parseassign (parserstate_t *);
 static astnode_t * parseeq (parserstate_t *);
+static astnode_t * parseexpstmt (parserstate_t *);
 static astnode_t * parsecomp (parserstate_t *);
 static astnode_t * parseor (parserstate_t *);
 static astnode_t * parsexor (parserstate_t *);
@@ -98,7 +99,7 @@ static astnode_t * parsestmt (parserstate_t * state) {
         return parseblock (state);
     }
     else {
-        ret = parseexp (state);
+        ret = parseexpstmt (state);
     }
 
     if (state->tok->type != eof) {
@@ -106,6 +107,12 @@ static astnode_t * parsestmt (parserstate_t * state) {
     }
 
     return ret;
+}
+
+static astnode_t * parseexpstmt (parserstate_t * state) {
+    astnode_t * exp = parseexp (state);
+
+    return expstmtnode_init (exp);
 }
 
 static astnode_t * parseauto (parserstate_t * state) {

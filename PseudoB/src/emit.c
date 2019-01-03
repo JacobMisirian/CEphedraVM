@@ -9,6 +9,7 @@ static void hcharc (emitstate_t *, astnode_t *);
 static void hcond (emitstate_t *, astnode_t *);
 static void hcont (emitstate_t *, astnode_t *);
 static void hderef (emitstate_t *, astnode_t *);
+static void hexpstmt (emitstate_t *, astnode_t *);
 static void hfloop (emitstate_t *, astnode_t *);
 static void hfunccall (emitstate_t *, astnode_t *);
 static void hfuncdec (emitstate_t *, astnode_t *);
@@ -43,7 +44,7 @@ void emit_free (emitstate_t * state) {
 }
 
 void emit_run (emitstate_t * state) {
-    printf ("ld sp, 2000\n");
+    printf ("ld sp, 3000\n");
     printf ("call main\n");
     printf ("hcf\n");
 
@@ -109,6 +110,8 @@ static void hassign (emitstate_t * state, astnode_t * node) {
         
         printf ("sb r%d, r%d\n", r0, r2);
     }
+
+    pushreg (state);
 }
 
 static void hbinop (emitstate_t * state, astnode_t * node) {
@@ -282,6 +285,15 @@ static void hfunccall (emitstate_t * state, astnode_t * node) {
     for (int i = 0; i < argc - 1; i++) {
         printf ("pop r%d\n", r1);
     }
+
+    pushreg (state);
+}
+
+static void hexpstmt (emitstate_t * state, astnode_t * node) {
+    expstmtstate_t * expstmtstate = (expstmtstate_t *)node->state;
+
+    handle (state, expstmtstate->exp);
+    popreg (state);
 }
 
 static void hfuncdec (emitstate_t * state, astnode_t * node) {
@@ -423,6 +435,11 @@ static void handle (emitstate_t * state, astnode_t * node) {
         break;
     case derefnode:
         hderef (state, node);
+        break;
+    case dummynode:
+        break;
+    case expstmtnode:
+        hexpstmt (state, node);
         break;
     case floopnode:
         hfloop (state, node);
