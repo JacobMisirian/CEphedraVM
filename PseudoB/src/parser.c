@@ -148,7 +148,9 @@ static astnode_t * parsefloop (parserstate_t * state) {
 
     expect (state, oparen);
     astnode_t * prestmt = parsestmt (state);
+    accept (state, semicol);
     astnode_t * cond = parseexp (state);
+    accept (state, semicol);
     astnode_t * repstmt = parsestmt (state);
     expect (state, cparen);
 

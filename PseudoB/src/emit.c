@@ -201,7 +201,28 @@ static void hderef (emitstate_t * state, astnode_t * node) {
     pushreg (state);
 }
 
-static void hfloop (emitstate_t * state, astnode_t * node) {}
+static void hfloop (emitstate_t * state, astnode_t * node) {
+    floopstate_t * floopstate = (floopstate_t *)node->state;
+
+    char * loopsym = gensym (state);
+    char * endsym = gensym (state);
+
+    handle (state, floopstate->prestmt);
+
+    printf (".%s\n", loopsym);
+
+    handle (state, floopstate->cond);
+    int r = popreg (state);
+
+    printf ("sub r%d, 1\n", r);
+    printf ("jne %s\n", endsym);
+
+    handle (state, floopstate->body);
+    handle (state, floopstate->repstmt);
+
+    printf ("jmp %s\n", loopsym);
+    printf (".%s\n", endsym);
+}
 
 static void hfunccall (emitstate_t * state, astnode_t * node) {
     funccallstate_t * funccallstate = (funccallstate_t *)node->state;

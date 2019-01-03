@@ -7,19 +7,44 @@ ld bp, sp
 sub sp, 2
 ld r0, bp
 sub r0, 2
-ld r1, sym0
+ld r1, 0
 sw r0, r1
+.sym0
 ld r0, bp
 sub r0, 2
 lw r0, r0
-lw r0, r0
+ld r1, 10
+sub r0, r1
+ld r0, flags
+shir r0, 1
+sub r0, 1
+jne sym1
+ld r0, 97
+ld r1, bp
+sub r1, 2
+lw r1, r1
+add r0, r1
 push r0
 ld r0, 4000
+ld r1, bp
+sub r1, 2
+lw r1, r1
+add r0, r1
 push r0
 ld r0, putchar
 call r0
 pop r0
 pop r0
+ld r0, bp
+sub r0, 2
+ld r1, bp
+sub r1, 2
+lw r1, r1
+ld r2, 1
+add r1, r2
+sw r0, r1
+jmp sym0
+.sym1
 add sp, 2
 pop bp
 ret
@@ -37,5 +62,3 @@ sw r0, r1
 add sp, 0
 pop bp
 ret
-.sym0
-"hello world!"
