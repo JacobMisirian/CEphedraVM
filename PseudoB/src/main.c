@@ -1,6 +1,5 @@
 #include <inc/emit.h>
 #include <inc/lexer.h>
-#include <inc/llist.h>
 #include <inc/parser.h>
 #include <inc/token.h>
 #include <inc/toktype.h>

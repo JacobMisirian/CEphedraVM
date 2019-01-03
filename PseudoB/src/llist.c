@@ -37,6 +37,29 @@ node_t * llist_add (node_t * root, void * ptr) {
     return tmp;
 }
 
+node_t * llist_remove (node_t * root, int i) {
+    node_t * tmp = root;
+    if (root == NULL) {
+        return NULL;
+    }
+    if (i == 0) {
+        free (root);
+        return NULL;
+    }
+
+    node_t * pre = root;
+    size_t size = llist_size (root);
+    for (int j = 0; (j < i) && (root != NULL); j++) {
+        pre = root;
+        root = root->next;
+    }
+
+    pre->next = root->next;
+    free (root);
+
+    return tmp;
+}
+
 void * llist_get (node_t * root, int i) {
     for (int j = 0; (j < i) && (root != NULL); j++) {
         root = root->next;
