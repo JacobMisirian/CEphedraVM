@@ -1,9 +1,5 @@
 main () {
-    auto a = "HEllo, World!";
-    putchar (4000, *a);
-    putchar (4005, *(a + 1));
-}
-
-putchar (loc, c) {
-    *loc = c;
+    for (auto b = 0; b < 10; b = b + 1) {
+         4000 [b] = 'A' + b;
+    }
 }

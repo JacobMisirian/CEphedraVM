@@ -66,7 +66,7 @@ void emit_run (emitstate_t * state) {
 static void hassign (emitstate_t * state, astnode_t * node) {
     assignstate_t * assignstate = (assignstate_t *)node->state;
 
-    int r0, r1;
+    int r0, r1, r2;
 
     if (assignstate->left->type == derefnode) {
         handle (state, ((derefstate_t *)assignstate->left->state)->target);
@@ -95,6 +95,19 @@ static void hassign (emitstate_t * state, astnode_t * node) {
 
         printf ("sw r%d, r%d\n", r0, r1);
         popreg (state); // pop r0
+    }
+    else if (assignstate->left->type == subscrnode) {
+        subscrstate_t * subscrstate = (subscrstate_t *)assignstate->left->state;
+        handle (state, subscrstate->val);
+        handle (state, subscrstate->target);
+        handle (state, assignstate->right);
+        int r2 = popreg (state);
+        r0 = popreg (state);
+        r1 = popreg (state);
+
+        printf ("add r%d, r%d\n", r0, r1);
+        
+        printf ("sb r%d, r%d\n", r0, r2);
     }
 }
 
@@ -348,7 +361,21 @@ static void hstringc (emitstate_t * state, astnode_t * node) {
     printf ("ld r%d, %s\n", pushreg (state), sym);
 }
 
-static void hsubscr (emitstate_t * state, astnode_t * node) {}
+static void hsubscr (emitstate_t * state, astnode_t * node) {
+    subscrstate_t * subscrstate = (subscrstate_t *)node->state;
+
+    int r0, r1;
+
+    handle (state, subscrstate->target);
+    handle (state, subscrstate->val);
+    r1 = popreg (state);
+    r0 = popreg (state);
+
+    printf ("add r%d, r%d\n", r0, r1);
+    printf ("lb r%d, r%d\n", r0, r0);
+
+    pushreg (state);
+}
 
 static void hwloop (emitstate_t * state, astnode_t * node) {
     wloopstate_t * wloopstate = (wloopstate_t *)node->state;

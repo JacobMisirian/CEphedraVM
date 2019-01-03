@@ -352,7 +352,7 @@ static astnode_t * parseaccess (parserstate_t * state, astnode_t * left) {
     else if (accept (state, osquare)) {
         astnode_t * val = parseexp (state);
         expect (state, csquare);
-        return parseaccess (state, subscrnode_init (left, val));
+        return subscrnode_init (left, val);
     }
     else {
         return left;

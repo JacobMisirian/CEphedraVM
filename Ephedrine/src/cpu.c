@@ -123,7 +123,7 @@ void cpu_power (cpustate_t * state) {
                 state->registers[R_IP] = (uint16_t)state->ram [state->registers [R_STACK]++] ^ (((uint16_t)state->ram [state->registers [R_STACK]++]) << 8);
                 continue;
             case INST_SB:
-                state->ram [state->registers [op1]] = second;
+                state->ram [state->registers [op1]] = (uint8_t)second;
                 break;
             case INST_SHIL:
                 state->registers [op1] <<= second;

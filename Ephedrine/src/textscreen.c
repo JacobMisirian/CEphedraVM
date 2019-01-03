@@ -4,7 +4,7 @@ static uint8_t buffer [TEXT_WIDTH * TEXT_HEIGHT];
 
 
 void textscreen_power (void * cpustate) {
-    
+    system ("clear");
 }
 
 void textscreen_tick (void * cpustate) {
