@@ -49,7 +49,7 @@ void cpu_power (cpustate_t * state) {
             second = state->registers [op2];
         }
 
-//        printf ("Int: %u, Opcode %u, Op1: %u, Op2: %u, Imm: %u\n", inst, code, op1, op2, imm);
+        printf ("Int: %u, Opcode %u, Op1: %u, Op2: %u, Imm: %u\n", inst, code, op1, op2, imm);
  
         switch (code) {
             case INST_ADD:
@@ -74,7 +74,7 @@ void cpu_power (cpustate_t * state) {
                 break;
             case INST_HCF:
                 for (int i = 0; i < 0x10; i++) {
-  //                  printf ("Register %d: %d\n", i, state->registers [i]);
+                    printf ("Register %d: %d\n", i, state->registers [i]);
                 }
                 return;
             case INST_JIL:

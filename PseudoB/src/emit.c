@@ -34,6 +34,7 @@ emitstate_t * emit_init (parserstate_t * parser) {
     state->lbls = ldict_init ();
     state->breakstack = lstack_init ();
     state->contstack = lstack_init ();
+    state->funcstack = lstack_init ();
 
     return state;
 }
@@ -244,7 +245,7 @@ static void hfloop (emitstate_t * state, astnode_t * node) {
 
     handle (state, floopstate->prestmt);
 
-    printf (".%s\n", loopsym);
+    printf ("._%s\n", loopsym);
 
     handle (state, floopstate->cond);
     int r = popreg (state);
@@ -260,6 +261,13 @@ static void hfloop (emitstate_t * state, astnode_t * node) {
 
     lstack_pop (state->breakstack);
     lstack_pop (state->contstack);
+}
+
+static void hexpstmt (emitstate_t * state, astnode_t * node) {
+    expstmtstate_t * expstmtstate = (expstmtstate_t *)node->state;
+
+    handle (state, expstmtstate->exp);
+    popreg (state);
 }
 
 static void hfunccall (emitstate_t * state, astnode_t * node) {
@@ -286,20 +294,16 @@ static void hfunccall (emitstate_t * state, astnode_t * node) {
         printf ("pop r%d\n", r1);
     }
 
-    pushreg (state);
-}
-
-static void hexpstmt (emitstate_t * state, astnode_t * node) {
-    expstmtstate_t * expstmtstate = (expstmtstate_t *)node->state;
-
-    handle (state, expstmtstate->exp);
-    popreg (state);
+    r0 = pushreg (state);
+    printf ("ld r%d, r11\n", r0);
 }
 
 static void hfuncdec (emitstate_t * state, astnode_t * node) {
     funcdecstate_t * funcdecstate = (funcdecstate_t *)node->state;
     state->curfunc = funcdecstate;
- 
+
+    char * retsym = gensym (state);
+    lstack_push (state->funcstack, (void *)retsym);
     int localsize = (int)llist_size (state->curfunc->locals) * 2;
 
     printf (".%s\n", funcdecstate->name);
@@ -309,10 +313,12 @@ static void hfuncdec (emitstate_t * state, astnode_t * node) {
     
     handle (state, funcdecstate->body);
     
+    printf (".%s\n", retsym);
     printf ("add sp, %d\n", localsize);
     printf ("pop bp\n");
 
     printf ("ret\n");
+    lstack_pop (state->funcstack);
 }
 
 static void hid (emitstate_t * state, astnode_t * node) {
@@ -359,7 +365,19 @@ static void href (emitstate_t * state, astnode_t * node) {
     }
 }
 
-static void hret (emitstate_t * state, astnode_t * node) {}
+static void hret (emitstate_t * state, astnode_t * node) {
+    retstate_t * retstate = (retstate_t *)node->state;
+
+    char * retsym = (char *)lstack_peek (state->funcstack);
+
+    int r;
+
+    handle (state, retstate->val);
+    r = popreg (state);
+
+    printf ("ld r11, r%d\n", r);
+    printf ("jmp %s\n", retsym);
+}
 
 static void hstringc (emitstate_t * state, astnode_t * node) {
     stringcstate_t * stringcstate = (stringcstate_t *)node->state;
@@ -395,6 +413,9 @@ static void hwloop (emitstate_t * state, astnode_t * node) {
     char * loopsym = gensym (state);
     char * endsym = gensym (state);
 
+    lstack_push (state->contstack, (void *)loopsym);
+    lstack_push (state->breakstack, (void *)endsym);
+
     printf (".%s\n", loopsym);
 
     handle (state, wloopstate->cond);
@@ -407,6 +428,9 @@ static void hwloop (emitstate_t * state, astnode_t * node) {
 
     printf ("jmp %s\n", loopsym);
     printf (".%s\n", endsym);
+
+    lstack_pop (state->contstack);
+    lstack_pop (state->breakstack);
 }
 
 static void handle (emitstate_t * state, astnode_t * node) {

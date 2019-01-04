@@ -16,6 +16,7 @@ typedef struct {
     ldictstate_t * lbls;
     lstackstate_t * breakstack;
     lstackstate_t * contstack;
+    lstackstate_t * funcstack;
     int curreg;
     int cursym;
 } emitstate_t;

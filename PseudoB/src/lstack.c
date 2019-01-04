@@ -30,8 +30,7 @@ void * lstack_pop (lstackstate_t * state) {
     }
 
     void * ret = llist_get (state->list, --state->top);
-    llist_remove (state->list, state->top);
-
+    state->list = llist_remove (state->list, state->top);
     return ret;
 }
 

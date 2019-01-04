@@ -12,7 +12,7 @@
 
 typedef struct {
     char * code;
-    uint32_t pos;
+    int pos;
     uint32_t len;
 } lexerstate_t;
 
