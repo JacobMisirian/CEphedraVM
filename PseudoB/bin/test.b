@@ -1,9 +1,7 @@
 main () {
-    putchar (4000, addd (97, 2));
-}
-
-addd (x, y) {
-    return x + y;
+    auto a = 97;
+    a += 3;
+    putchar (4000, a);
 }
 
 putchar (loc, c) {

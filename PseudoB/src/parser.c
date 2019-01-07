@@ -203,8 +203,36 @@ static astnode_t * parseassign (parserstate_t * state) {
         return left;
     }
 
-    if (accept (state, assign)) {
+    if (acceptv (state, assign, "=")) {
         return assignnode_init (left, parseassign (state));
+    }
+    else if (acceptv (state, assign, "+=")) {
+        return assignnode_init (left,
+                binopnode_init (add, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "-=")) {
+        return assignnode_init (left, 
+                binopnode_init (sub, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "*=")) {
+        return assignnode_init (left,
+                binopnode_init (mul, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "/=")) {
+        return assignnode_init (left,
+                binopnode_init (divide, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "|=")) {
+        return assignnode_init (left,
+                binopnode_init (or, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "^=")) {
+        return assignnode_init (left,
+                binopnode_init (xor, left, parseassign (state)));
+    }
+    else if (acceptv (state, assign, "&=")) {
+        return assignnode_init (left,
+                binopnode_init (and, left, parseassign (state)));
     }
 
     return left;

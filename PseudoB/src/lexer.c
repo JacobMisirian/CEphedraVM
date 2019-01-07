@@ -7,6 +7,7 @@ static void nextstrc  (lexerstate_t *, token_t *);
 static void wspace    (lexerstate_t *);
 static int readc      (lexerstate_t *);
 static int peekc      (lexerstate_t *);
+static int peekupc    (lexerstate_t *, int);
 
 lexerstate_t * lexer_init (FILE * f) {
     lexerstate_t * state = (lexerstate_t *)malloc (sizeof (lexerstate_t));
@@ -89,6 +90,9 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
         switch (c) {
             case '=':
             token->type = assign;
+            token->val = (char *)malloc (2);
+            token->val [0] = c;
+            token->val [1] = 0;
             break;
             case '}':
             token->type = cbrace;
@@ -115,17 +119,40 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
             case '{':
             token->type = obrace;
             break;
+            case '!':
             case '+':
             case '-':
             case '*':
             case '/':
             case '%':
-            case '>':
+            if ((char)peekc (state) == '=') {
+                token->type = assign;
+                token->val = (char *)malloc (3);
+                token->val [0] = c;
+                token->val [1] = (char)readc(state);
+                token->val [2] = 0;
+            }
+            else {
+                token->type = op;
+                token->val = (char *)malloc (2);
+                token->val [0] = c;
+                token->val [1] = 0;
+            }
+            break;
             case '<':
+            case '>':
             token->type = op;
-            token->val = (char *)malloc (2);
-            token->val [0] = c;
-            token->val [1] = 0;
+            if ((char) peekc (state) == c) {
+                token->val = (char *)malloc (3);
+                token->val [0] = c;
+                token->val [1] = (char)readc (state);
+                token->val [2] = 0;
+            }
+            else {
+                token->val = (char *)malloc (2);
+                token->val [0] = c;
+                token->val [1] =0;
+            }
             break;
             case '(':
             token->type = oparen;
@@ -222,4 +249,8 @@ static int readc (lexerstate_t * state) {
 
 static int peekc (lexerstate_t * state) {
     return state->pos < state->len ? state->code [state->pos] : -1;
+}
+
+static int peekupc (lexerstate_t * state, int c) {
+    return state->pos + c < state->len ? state->code [state->pos + c] : -1;
 }
