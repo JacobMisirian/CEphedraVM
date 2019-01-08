@@ -104,6 +104,9 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
             token->val [1] = 0;
             readc (state); // '
             break;
+            case ':':
+            token->type = colon;
+            break;
             case ',':
             token->type = comma;
             break;
@@ -126,7 +129,7 @@ void lexer_nexttok (lexerstate_t * state, token_t * token) {
             case '/':
             case '%':
             if ((char)peekc (state) == '=') {
-                token->type = assign;
+                token->type = c == '!' ? op : assign;
                 token->val = (char *)malloc (3);
                 token->val [0] = c;
                 token->val [1] = (char)readc(state);

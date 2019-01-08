@@ -1,5 +1,55 @@
-ld r1, 1
-ld r2, 2
-not r1
-not r2
+ld sp, 3000
+call main
 hcf
+.main
+push bp
+ld bp, sp
+sub sp, 0
+ld r0, 3
+ld r1, 4
+sub r0, r1
+ld r0, flags
+not r0
+and r0, 1
+sub r0, 1
+jne sym1
+ld r0, 97
+push r0
+ld r0, 4000
+push r0
+ld r0, putchar
+call r0
+pop r0
+pop r0
+ld r0, r11
+jmp sym2
+.sym1
+ld r0, 98
+push r0
+ld r0, 4000
+push r0
+ld r0, putchar
+call r0
+pop r0
+pop r0
+ld r0, r11
+.sym2
+.sym0
+add sp, 0
+pop bp
+ret
+.putchar
+push bp
+ld bp, sp
+sub sp, 0
+ld r0, bp
+add r0, 4
+lw r0, r0
+ld r1, bp
+add r1, 6
+lw r1, r1
+sw r0, r1
+.sym3
+add sp, 0
+pop bp
+ret

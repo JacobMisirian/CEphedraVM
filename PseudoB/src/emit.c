@@ -168,6 +168,21 @@ static void hbinop (emitstate_t * state, astnode_t * node) {
         printf ("and r%d, 3\n", r0);
         pushreg (state);
         break;
+    case mod:
+        printf ("mod r%d, r%d\n", r0, r1);
+        pushreg (state);
+        break;
+    case mul:
+        printf ("mul r%d, r%d\n", r0, r1);
+        pushreg (state);
+        break;
+    case neq:
+        printf ("sub r%d, r%d\n", r0, r1);
+        printf ("ld r%d, flags\n", r0);
+        printf ("not r%d\n", r0);
+        printf ("and r%d, 1\n", r0);
+        pushreg (state);
+        break;
     }
 }
 

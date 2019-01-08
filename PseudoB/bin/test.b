@@ -1,7 +1,10 @@
 main () {
-    auto a = 97;
-    a += 3;
-    putchar (4000, a);
+    if (3 != 4) {
+        putchar (4000, 'a');
+    }
+    else {
+        putchar (4000, 'b');
+    }
 }
 
 putchar (loc, c) {
