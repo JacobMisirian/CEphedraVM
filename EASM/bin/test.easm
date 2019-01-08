@@ -1,49 +1,5 @@
-ld sp, 3000
-call main
+ld r1, 1
+ld r2, 2
+not r1
+not r2
 hcf
-.main
-push bp
-ld bp, sp
-sub sp, 2
-ld r0, bp
-sub r0, 2
-ld r1, 97
-sw r0, r1
-ld r1, bp
-sub r1, 2
-ld r2, bp
-sub r2, 2
-lw r2, r2
-ld r3, 3
-add r2, r3
-sw r1, r2
-ld r1, bp
-sub r1, 2
-lw r1, r1
-push r1
-ld r1, 4000
-push r1
-ld r1, putchar
-call r1
-pop r1
-pop r1
-ld r1, r11
-.sym0
-add sp, 2
-pop bp
-ret
-.putchar
-push bp
-ld bp, sp
-sub sp, 0
-ld r1, bp
-add r1, 4
-lw r1, r1
-ld r2, bp
-add r2, 6
-lw r2, r2
-sw r1, r2
-.sym1
-add sp, 0
-pop bp
-ret

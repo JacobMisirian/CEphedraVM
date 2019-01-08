@@ -109,6 +109,9 @@ void cpu_power (cpustate_t * state) {
                 state->registers [op1] *= second;
                 setflags (state, state->registers [op1]);
                 break;
+            case INST_NOT:
+                state->registers [op1] = ~state->registers [op1];
+                break;
             case INST_POP:
                 state->registers [op1] = (uint16_t)state->ram [state->registers [R_STACK]++] ^ 
                                                     (((uint16_t)state->ram [state->registers [R_STACK]++]) << 8);

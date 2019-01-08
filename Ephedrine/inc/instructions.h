@@ -14,15 +14,16 @@
 #define INST_LW 0xA
 #define INST_MOD 0xB
 #define INST_MUL 0xC
-#define INST_OR 0xD
-#define INST_POP 0xE
-#define INST_PUSH 0xF
-#define INST_RET 0x10
-#define INST_SB 0x11
-#define INST_SHIL 0x12
-#define INST_SHIR 0x13
-#define INST_SW 0x14
-#define INST_SUB 0x15
-#define INST_XOR 0x16
+#define INST_NOT 0xD
+#define INST_OR 0xE
+#define INST_POP 0xF
+#define INST_PUSH 0x10
+#define INST_RET 0x11
+#define INST_SB 0x12
+#define INST_SHIL 0x13
+#define INST_SHIR 0x14
+#define INST_SW 0x15
+#define INST_SUB 0x16
+#define INST_XOR 0x20
 
 #endif

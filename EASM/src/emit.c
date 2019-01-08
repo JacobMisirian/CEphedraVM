@@ -80,7 +80,7 @@ static uint32_t expectinst (emitstate_t * state) {
         }
     }
     // <op> <r1>
-    else if (strcmp (id, "pop") == 0) {
+    else if (strcmp (id, "pop") == 0 || strcmp (id, "not") == 0) {
         op1 = expectreg (state);
     }
     // <op> [<r1>/<int>/<lbl>]
